@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz · Modelos Matemáticos y Simulación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f5f1;--card:#ffffff;--ink:#1d1d1f;--muted:#6b6b70;--line:#e4e2db;
+  --accent:#2f5bd3;--accent-soft:#e8eefc;--ok:#1f8a4c;--ok-soft:#e3f4ea;--bad:#c23b3b;--bad-soft:#fbe7e7;
+  --code:#f3f2ee;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#141416;--card:#1d1d20;--ink:#ececee;--muted:#a0a0a8;--line:#2e2e33;
+  --accent:#7d9cff;--accent-soft:#232c45;--ok:#5cc98a;--ok-soft:#1c3226;--bad:#ff7d7d;--bad-soft:#3a2224;--code:#25252a;}
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+.wrap{max-width:820px;margin:0 auto;padding:28px 18px 60px}
+header h1{font-size:1.55rem;margin:0 0 4px;letter-spacing:-.01em}
+header p{margin:0;color:var(--muted);font-size:.95rem}
+.tabs{display:flex;gap:6px;margin:22px 0 16px;border-bottom:1px solid var(--line)}
+.tab{background:none;border:none;padding:10px 14px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab.on{color:var(--accent);border-color:var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px}
+.label{font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:.88rem;cursor:pointer}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:18px}
+.row label{display:flex;gap:8px;align-items:center;font-size:.93rem;cursor:pointer}
+select{font:inherit;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.btn{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:11px 20px;font:inherit;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.btn:disabled{opacity:.4;cursor:default}
+.top{display:flex;justify-content:space-between;align-items:center;font-size:.88rem;color:var(--muted);margin-bottom:8px}
+.bar{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin-bottom:18px}
+.bar>div{height:100%;background:var(--accent);width:0;transition:width .25s}
+.topic{display:inline-block;font-size:.75rem;font-weight:600;color:var(--accent);background:var(--accent-soft);padding:3px 9px;border-radius:999px;margin-bottom:10px}
+.q{font-size:1.08rem;font-weight:500;margin:0 0 14px;white-space:pre-line}
+pre{background:var(--code);border-radius:10px;padding:12px 14px;font-family:"JetBrains Mono",monospace;font-size:.83rem;overflow-x:auto;margin:0 0 16px;line-height:1.45}
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font:inherit;color:var(--ink);cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt .k{flex:none;width:24px;height:24px;border-radius:50%;background:var(--line);display:grid;place-items:center;font-size:.8rem;font-weight:700}
+.opt.ok{border-color:var(--ok);background:var(--ok-soft)}.opt.ok .k{background:var(--ok);color:#fff}
+.opt.bad{border-color:var(--bad);background:var(--bad-soft)}.opt.bad .k{background:var(--bad);color:#fff}
+.opt:disabled{cursor:default}
+.expl{margin-top:16px;padding:12px 14px;border-radius:10px;font-size:.93rem;border-left:4px solid}
+.expl.ok{background:var(--ok-soft);border-color:var(--ok)}.expl.bad{background:var(--bad-soft);border-color:var(--bad)}
+.nav{display:flex;justify-content:space-between;margin-top:18px;gap:10px}
+.big{font-size:2.6rem;font-weight:700;margin:0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:18px 0}
+.stat{border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:.88rem}
+.stat b{display:block;font-size:1.05rem}
+.review-item{border-top:1px solid var(--line);padding:16px 0}
+.review-item:first-child{border-top:none;padding-top:0}
+.ans{font-size:.93rem;margin-top:6px}
+.ans b{color:var(--ok)}
+.muted{color:var(--muted);font-size:.88rem}
+input[type=search]{width:100%;font:inherit;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);margin-bottom:16px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Modelos Matemáticos y Simulación</h1>
+  <p>Banco de 214 preguntas únicas con respuesta correcta y explicación.</p>
+</header>
+
+<div class="tabs">
+  <button class="tab on" data-v="setup">Quiz</button>
+  <button class="tab" data-v="study">Respuestas</button>
+</div>
+
+<section id="setup" class="card">
+  <p class="label">Temas</p>
+  <div class="chips" id="chips"></div>
+  <div class="row">
+    <label>Preguntas:
+      <select id="count"><option value="16">16</option><option value="30">30</option><option value="50">50</option><option value="all" selected>Todas</option></select>
+    </label>
+    <label><input type="checkbox" id="shuffleQ" checked> Mezclar preguntas</label>
+    <label><input type="checkbox" id="shuffleO"> Mezclar opciones</label>
+  </div>
+  <button class="btn" id="start">Comenzar</button>
+  <p class="muted" id="avail" style="margin:12px 0 0"></p>
+</section>
+
+<section id="quiz" class="card hidden">
+  <div class="top"><span id="pos"></span><span id="score"></span></div>
+  <div class="bar"><div id="prog"></div></div>
+  <span class="topic" id="qtopic"></span>
+  <p class="q" id="qtext"></p>
+  <pre id="qcode" class="hidden"></pre>
+  <div class="opts" id="opts"></div>
+  <div id="expl" class="expl hidden"></div>
+  <div class="nav">
+    <button class="btn ghost" id="quit">Terminar</button>
+    <button class="btn" id="next" disabled>Siguiente</button>
+  </div>
+</section>
+
+<section id="result" class="card hidden"></section>
+
+<section id="study" class="card hidden">
+  <input type="search" id="find" placeholder="Buscar en las preguntas…">
+  <div id="list"></div>
+</section>
+</div>
+
+<script>
+const T={G:"Grafos",P:"Redes de Petri",A:"Ajuste de curvas",S:"Conceptos de simulación",N:"Números pseudoaleatorios",R:"Probabilidad",O:"Optimización",Y:"Python / NumPy",E:"EDO y métodos numéricos"};
+// [tema, pregunta, código, opciones, índice correcto, explicación]
+const Q=[
+["G","En el mapa de navegación de una app, cada pantalla es un vértice y cada botón que lleva a otra pantalla es un arco. Una pantalla con d⁺(v) = 0 representa:","",["una pantalla a la que no se puede llegar desde el inicio","una pantalla que se puede visitar en un solo toque","una pantalla sin salida donde el usuario queda atrapado","la pantalla con más enlaces de entrada de toda la app"],2,"d⁺(v) es el semigrado de salida. Si vale 0, no sale ningún arco: es un callejón sin salida."],
+["A","Ajuste el modelo de potencia y = b·xᵐ a los datos x: 1, 2, 3, 4, 5 y y: 0.5, 1.7, 3.4, 5.7, 8.4, linealizando con ln y y ln x. ¿Qué modelo se obtiene?","",["y = 0.501·e^(1.752x)","y = −0.691·x^1.752","y = 0.501·x^1.752","y = 1.752·x^0.501"],2,"La recta ln y vs ln x da pendiente m = 1.752 e intercepto −0.691, de modo que b = e^(−0.691) = 0.501."],
+["P","Un pedido en línea genera dos tareas en paralelo (pago y stock) y el envío necesita ambas. Después de disparar Recibir y Pagar, ¿qué imprime?","M = {'Pedido': 3, 'Pago_pend': 0, 'Stock_pend': 0,\n     'Pago_ok': 0, 'Stock_ok': 0, 'Enviado': 0}\npre = {'Recibir': {'Pedido': 1},\n       'Pagar': {'Pago_pend': 1},\n       'Verificar': {'Stock_pend': 1},\n       'Enviar': {'Pago_ok': 1, 'Stock_ok': 1}}\npost = {'Recibir': {'Pago_pend': 1, 'Stock_pend': 1},\n        'Pagar': {'Pago_ok': 1},\n        'Verificar': {'Stock_ok': 1},\n        'Enviar': {'Enviado': 1}}\n\ndef habilitada(t):\n    return all(M[p] >= w for p, w in pre[t].items())\n\ndef disparar(t):\n    for p, w in pre[t].items(): M[p] -= w\n    for p, w in post[t].items(): M[p] += w\n\ndisparar('Recibir')\ndisparar('Pagar')\nprint([t for t in pre if habilitada(t)])",["['Verificar', 'Enviar']","['Recibir', 'Pagar', 'Verificar']","['Recibir', 'Verificar']","['Enviar']"],2,"Quedan Pedido = 2, Pago_pend = 0, Stock_pend = 1 y Pago_ok = 1. Recibir y Verificar están habilitadas; Enviar no, porque Stock_ok = 0."],
+["S","La simulación consiste en:","",["identificar las variables exógenas y endógenas que intervienen en el sistema","medir directamente las variables del sistema real en distintas condiciones","experimentar con el modelo para predecir el comportamiento del sistema","construir la descripción matemática del sistema a partir de datos reales"],2,"Simular es experimentar con el modelo (no con el sistema real) para predecir su comportamiento."],
+["Y","Para M = [[2, 1, 0], [0, 3, 1], [1, 2, 4]], ¿qué devuelve np.trace(M)?","",["5","21","9","3"],2,"La traza es la suma de la diagonal principal: 2 + 3 + 4 = 9."],
+["R","Una variable X es uniforme continua entre 2 y 8. ¿Cuál es su varianza, si Var[X] = (b − a)²/12?","",["0.5","6","3","36"],2,"(8 − 2)²/12 = 36/12 = 3."],
+["O","Cuatro desarrolladores deben tomar una tarea cada uno, sin repetir tareas. ¿Cuántas asignaciones evalúa una búsqueda exhaustiva?","",["16","12","24","256"],2,"Son permutaciones: 4! = 24."],
+["Y","¿Cuál es la diferencia entre sorted(temperaturas) y temperaturas.sort()?","",["sorted ordena de mayor a menor y sort de menor a mayor","Ambas devuelven una lista nueva y dejan intacta la original","sort devuelve una lista nueva; sorted ordena la lista original","sorted devuelve una lista nueva; sort ordena la lista original"],3,"sorted() crea una lista nueva; .sort() modifica la lista en su lugar y devuelve None."],
+["S","¿Cuál es el orden correcto de estas cuatro etapas de la simulación?","",["Validación → diseño de experimentos → experimentación → interpretación","Experimentación → validación → diseño de experimentos → interpretación","Validación → experimentación → diseño de experimentos → interpretación","Diseño de experimentos → validación → interpretación → experimentación"],0,"Primero se valida el modelo; luego se diseñan los experimentos, se ejecutan y se interpretan los resultados."],
+["G","En la matriz de incidencia de un dígrafo se pone +1 si el arco sale del vértice y −1 si llega a él. ¿Cuánto suma cada columna y por qué?","",["0, porque cada arco sale de un vértice y llega a otro","El grado del vértice, porque cada columna es un vértice","1, porque cada arco tiene un solo vértice de origen","2, porque cada arco tiene exactamente dos extremos"],0,"Cada columna es un arco y tiene exactamente un +1 (origen) y un −1 (destino): suma 0."],
+["O","Un algoritmo de optimización es exacto cuando garantiza encontrar el óptimo. ¿Cuál de estos métodos es exacto?","",["Enfriamiento simulado","Colonia de hormigas","Búsqueda tabú","Ramificación y poda"],3,"Ramificación y poda explora (implícitamente) todo el espacio y garantiza el óptimo; las otras son metaheurísticas."],
+["A","La altura de un cohete se mide en (t, h) = (1, 135), (2, 265), (3, 385), (4, 485). Se ajusta h = a + bt − 4.905t² aplicando regresión lineal a y* = h + 4.905t² contra t. ¿Cuánto valen a y b?","",["a = 0.475 y b = 117.0","a = 0.475 y b = 141.525","a = 141.525 y b = 0.475","a = 25.0 y b = 117.0"],1,"y* = 139.905, 284.62, 429.145, 563.48. Pendiente = 707.625/5 = 141.525; a = 354.2875 − 2.5·141.525 = 0.475."],
+["E","Un lago bien mezclado cumple V·dC/dt = W − QC, con W = 300 000 g/día y Q = 60 000 m³/día. ¿A qué concentración de equilibrio tiende C(t)?","",["50 g/m³","0.2 g/m³","3 g/m³","5 g/m³"],3,"En equilibrio dC/dt = 0 → C = W/Q = 300 000/60 000 = 5 g/m³."],
+["N","Para que un generador congruencial Xᵢ₊₁ = (aXᵢ + c) mod 16 tenga periodo completo 16 se necesita que c sea impar y que a − 1 sea múltiplo de 4. ¿Qué pareja lo cumple?","",["a = 5, c = 4","a = 7, c = 3","a = 4, c = 3","a = 5, c = 3"],3,"c = 3 es impar y a − 1 = 4 es múltiplo de 4."],
+["R","Una variable es normal con media 10 y varianza 4. ¿Qué imprime el código?","from scipy import stats\nX = stats.norm(10, 2)    # scipy recibe la desviación estándar\nprint(round(X.cdf(9), 4))",["0.4013","0.5987","0.6915","0.3085"],3,"z = (9 − 10)/2 = −0.5 y Φ(−0.5) = 0.3085."],
+["O","¿Cuántas soluciones factibles imprime el código?","import itertools\nimport numpy as np\nP = np.array([4, 3, 5, 4])   # puntos de 4 historias\ncapacidad = 8\nfactibles = 0\nfor x in itertools.product([0, 1], repeat=4):\n    if P @ np.array(x) <= capacidad:\n        factibles += 1\nprint(factibles)",["11","8","16","9"],3,"Vacío (1) + cada historia sola (4) + parejas que suman ≤ 8: 4+3, 4+4, 3+5, 3+4 (4). Ningún trío cabe. Total 9."],
+["N","¿Cuántos valores distintos imprime el código antes de que la secuencia se repita?","x, vistos = 4, []\nwhile x not in vistos:\n    vistos.append(x)\n    x = (5 * x + 7) % 8\nprint(len(vistos))",["5","8","7","4"],1,"Secuencia 4, 3, 6, 5, 0, 7, 2, 1 y vuelve a 4: periodo completo de 8 (c impar, a − 1 múltiplo de 4)."],
+["N","Un tiempo de servicio exponencial con media 3 minutos se genera con x = −3·ln(1 − r). ¿Qué valor se obtiene con r = 0.64?","",["3.06 min","1.34 min","0.33 min","1.92 min"],0,"−3·ln(0.36) = −3·(−1.0217) = 3.06 min."],
+["G","Para un grafo no dirigido, traza(A³) = 24. Si cada triángulo se cuenta 6 veces en la traza, ¿cuántos triángulos tiene el grafo?","",["3","24","8","4"],3,"24/6 = 4 triángulos."],
+["O","Un técnico sale de la oficina, visita una vez a cada uno de 6 clientes y regresa. Las distancias son simétricas. ¿Cuántas rutas distintas hay si una ruta y su inversa cuentan como la misma?","",["720","360","120","64"],1,"6! = 720 órdenes de visita; al identificar cada ruta con su inversa: 720/2 = 360."],
+["E","La ecuación 25x'' + 5x' + 20x = 0 se reduce a un sistema con el estado [x₁, x₂] = [x, x']. ¿Cuál es la segunda componente de F(t, x)?","",["x[1]","-(5/25)*x[0] - (20/25)*x[1]","-(5/25)*x[1] - (20/25)*x[0]","-5*x[1] - 20*x[0]"],2,"x'' = −(5/25)x' − (20/25)x, con x' = x[1] y x = x[0]."],
+["G","Un grafo conexo tiene las aristas {1,2}, {2,3}, {3,4}, {4,1}, {1,3}, {2,4}, {3,5}, {4,5}. Para dibujarlo sin levantar el lápiz y sin repetir aristas, ¿desde qué vértice hay que empezar?","",["Desde 1 o desde 2","Desde 3 o desde 4","Desde 5 únicamente","Desde cualquier vértice"],0,"Grados: d(1)=3, d(2)=3, d(3)=4, d(4)=4, d(5)=2. Hay dos vértices impares (1 y 2): el camino euleriano empieza en uno y termina en el otro."],
+["A","Para un ajuste lineal con pendiente negativa se obtuvo r² = 0.9351. ¿Cuál es el coeficiente de correlación r y qué indica?","",["r = 0.967: relación lineal directa fuerte","r = −0.935: relación lineal inversa débil","r = 0.874: relación lineal directa moderada","r = −0.967: relación lineal inversa fuerte"],3,"r = −√0.9351 = −0.967 (signo de la pendiente). |r| cercano a 1 → inversa fuerte."],
+["S","En un modelo estocástico la salida se expresa como yⱼ = fₘ(xᵢ, lₖ). ¿Qué lo distingue de uno determinístico?","",["Se construye siempre con ecuaciones en derivadas parciales","La salida depende solo de las entradas y siempre es la misma","Su estado cambia solo en instantes discretos de tiempo","Tiene variables internas aleatorias y su salida varía"],3,"Las variables internas lₖ son aleatorias, así que la misma entrada puede dar salidas distintas."],
+["P","Una red tiene los arcos P1→T1, P6→T1, T1→P2, T1→P7, P2→T2, T2→P3, P3→T3, T3→P4, P4→T4, T4→P5, P5→T5, T5→P6, con una marca en P1 y otra en P6. Con M = M₀ + Cσ y σ = (T1,…,T5) = (1,1,1,0,0), ¿cuál es el marcado (P1,…,P7)?","",["(0,0,0,1,0,0,1)","(0,0,1,0,0,0,1)","(1,0,0,1,0,1,0)","(0,0,0,1,0,1,1)"],0,"T1 consume P1 y P6 y pone marcas en P2 y P7; T2 pasa la marca a P3; T3 la pasa a P4. Resultado: P4 = 1 y P7 = 1."],
+["A","El modelo de saturación y = ax/(b + x) se linealiza como 1/y = 1/a + (b/a)·(1/x). Si la recta tiene intercepto a₀ = 0.002 y pendiente a₁ = 0.0065, ¿cuánto valen a y b?","",["a = 0.002 y b = 3.25","a = 500 y b = 0.0065","a = 250 y b = 1.625","a = 500 y b = 3.25"],3,"a = 1/0.002 = 500; b = a₁·a = 0.0065·500 = 3.25."],
+["O","¿Qué característica define a un algoritmo voraz?","",["Elige lo mejor en cada paso y no deshace sus decisiones","Revisa todas las combinaciones y se queda con la mejor","Acepta soluciones peores con una probabilidad decreciente","Mueve una solución usando la derivada de la función"],0,"El voraz toma la mejor opción local en cada paso y nunca retrocede."],
+["O","En una ruta de 10 clientes, el vecindario se forma intercambiando la posición de dos clientes («swap»). ¿Cuántos vecinos tiene cada ruta?","",["45","10","100","90"],0,"Pares de posiciones: C(10, 2) = 45."],
+["Y","Se grafica sin(t)/t con t = np.arange(0.1, 20, 0.1). ¿Por qué el arreglo empieza en 0.1 y no en 0?","",["Porque sin(0) no está definido en NumPy","Para no dividir entre cero en t = 0","Para que el arreglo tenga 200 elementos","Porque np.arange no admite inicio en 0"],1,"En t = 0 la expresión sin(t)/t divide entre cero."],
+["R","El 10 % de los builds de un servidor de integración continua falla, de forma independiente. Si en un día se ejecutan 12 builds, ¿cuál es la probabilidad de que ninguno falle?","",["0.3766","0.2824","0.9000","0.7176"],1,"P(X = 0) = 0.9¹² = 0.2824."],
+["Y","¿Cuál es el contenido final de temperaturas?","temperaturas = [22.5, 23.1, 21.8, 24.0, 20.9]\ntemperaturas.append(25.3)\ntemperaturas.insert(0, 19.0)\ntemperaturas.remove(21.8)\ntemperaturas.pop()",["[22.5, 23.1, 24.0, 20.9, 25.3]","[19.0, 22.5, 23.1, 21.8, 24.0]","[19.0, 22.5, 23.1, 24.0, 20.9]","[19.0, 22.5, 23.1, 24.0, 20.9, 25.3]"],2,"append añade 25.3 al final, insert pone 19.0 al inicio, remove quita 21.8 y pop elimina el último (25.3)."],
+["S","En la estructura de un modelo de simulación, ¿qué diferencia hay entre actividad y evento?","",["Ambos términos son equivalentes y se usan como sinónimos en simulación","La actividad produce el cambio; el evento es el cambio de estado","El evento es la acción que se ejecuta; la actividad es el cambio de estado","La actividad describe a la entidad; el evento describe a los recursos"],1,"La actividad es el proceso que provoca el cambio; el evento es el instante en que cambia el estado."],
+["E","La ecuación y''' − 2y'' + y' = x·e⁻ˣ + 5 se escribe como sistema con el estado [y, y', y'']. ¿Cuál es la tercera componente de F(x, y)?","",["y[2]","2*y[2] - y[1] + x*np.exp(-x) + 5","2*y[1] - y[0] + x*np.exp(-x) + 5","-2*y[2] + y[1] + x*np.exp(-x) + 5"],1,"y''' = 2y'' − y' + x·e⁻ˣ + 5, con y'' = y[2] y y' = y[1]."],
+["P","Hay 10 t de residuo orgánico y 3 t de material seco. Cada pila de compost consume 2 t de orgánico y 1 t de seco (arcos de peso 2 y 1). Si se forman todas las pilas posibles, ¿cuántas se forman y cuánto orgánico sobra?","",["3 pilas y sobran 4 t de orgánico","5 pilas y no sobra orgánico","3 pilas y sobran 7 t de orgánico","6 pilas y sobra 1 t de orgánico"],0,"El seco limita: 3 pilas. Usan 6 t de orgánico y sobran 10 − 6 = 4 t."],
+["G","¿Cuántas aristas tiene el grafo completo K₈?","",["56","8","28","64"],2,"n(n − 1)/2 = 8·7/2 = 28."],
+["O","Un sprint tiene capacidad de 10 puntos y tres historias (puntos, valor): X (6, 15), Y (5, 11) y Z (5, 11). Un voraz ordena por valor/punto y agrega mientras quepan. ¿Qué valor obtiene el voraz y cuál es el óptimo?","",["Voraz 15; óptimo 22","Voraz 11; óptimo 15","Voraz 22; óptimo 22","Voraz 26; óptimo 26"],0,"X tiene mejor razón (2.5) y entra primero; luego Y y Z ya no caben → 15. El óptimo es Y + Z = 22."],
+["S","En la sección de cajas de un supermercado, el número de cajas abiertas en cada turno es una variable:","",["exógena controlable","endógena de estado","endógena de salida","exógena no controlable"],0,"Es una entrada que decide el gerente: exógena controlable."],
+["S","Un circuito RLC que se usa para estudiar las oscilaciones de un sistema masa-resorte, porque ambos obedecen ecuaciones de la misma forma, es un modelo:","",["material","icónico","analógico","discreto"],2,"Representa un sistema con otro físicamente distinto pero con el mismo comportamiento matemático: analógico."],
+["R","El tiempo hasta el mantenimiento de un equipo sigue una Gamma con α = 3 y β = 2 horas. ¿Cuáles son su media y su varianza?","",["1.5 y 12 horas²","6 y 6 horas²","6 y 12 horas²","5 y 9 horas²"],2,"Media = αβ = 6; varianza = αβ² = 12."],
+["Y","¿Qué tipo de trazo produce plt.plot(anio, poblacion, '--r')?","",["Línea punteada de color negro","Línea discontinua de color rojo","Puntos rojos sin línea que los una","Línea continua de color rojo"],1,"'--' es línea discontinua y 'r' es rojo."],
+["A","La concentración de un contaminante sigue C = 10.131·e^(−0.28313t). ¿Cuál es su vida media, t½ = ln2/|m|?","",["3.53","0.20","7.15","2.45"],3,"0.6931/0.28313 = 2.45."],
+["N","Una Weibull se genera con W = γ + β[−ln(1 − r)]^(1/α), con γ = 0, β = 5.19 y α = 1.38. ¿Qué valor se obtiene con r = 0.5?","",["3.98","3.60","2.60","4.97"],0,"−ln(0.5) = 0.6931; 0.6931^(1/1.38) = 0.767; 5.19·0.767 = 3.98."],
+["N","Con cuadrados medios, semilla X₀ = 5735 y D = 4: 5735² = 32890225 da X₁ = 8902. ¿Cuánto vale R₂?","",["0.4560","0.2456","0.8902","0.7924"],1,"8902² = 79245604 → 4 dígitos centrales: X₂ = 2456 → R₂ = 0.2456."],
+["O","Un sprint de 12 puntos tiene (puntos, valor): A (4, 15), D (3, 10), E (6, 11), I (5, 12), K (4, 10) y L (3, 7). Búsqueda local de mejor mejora desde {E, L}, con movimientos agregar, quitar o cambiar una historia. ¿En qué valor se detiene?","",["37","32","28","34"],0,"{E,L}=18 → agregar D: {E,L,D}=28 → cambiar E por A: {A,L,D}=32 → cambiar L por I: {A,D,I}=37. Ningún vecino mejora 37."],
+["A","Ajuste y = a₀ + a₁x por mínimos cuadrados a x: 1, 2, 3, 4, 5; y: 2.2, 4.1, 6.3, 7.9, 10.0. ¿Qué modelo se obtiene?","",["y = 0.28 + 1.94x","y = 0.28 + 2.06x","y = 0.42 + 1.94x","y = 1.94 + 0.28x"],0,"a₁ = Sxy/Sxx = 19.4/10 = 1.94; a₀ = 6.1 − 1.94·3 = 0.28."],
+["G","¿Puede existir un grafo simple con grados (3, 3, 2, 1)?","",["Sí, porque ningún grado supera el número de vértices","No, porque un grafo simple no admite vértices de grado 3","No, porque la suma de grados es impar y debe ser 2m","Sí, porque la suma de grados es 9 y no hay restricción"],2,"Suma = 9, impar. Por el lema del apretón de manos debe ser 2m (par)."],
+["Y","En una figura con plt.subplot(2, 2, k), ¿qué posición ocupa el gráfico con k = 3?","",["Fila inferior, columna izquierda","Fila superior, columna derecha","Fila inferior, columna derecha","Fila superior, columna izquierda"],0,"Se numera por filas: 1 y 2 arriba, 3 y 4 abajo. El 3 es abajo a la izquierda."],
+["O","Al entrenar una red neuronal, cada peso se actualiza con w ← w − η·∂L/∂w. ¿Qué representa L?","",["El error o pérdida de la red","El número de épocas","El número de capas ocultas","La tasa de aprendizaje"],0,"L es la función de pérdida que se minimiza; η es la tasa de aprendizaje."],
+["A","La concentración se midió en t: 0, 1, 2, 3 con C: 50, 30.5, 18.2, 11.1. Ajuste C = b·e^(mt) linealizando con ln C. ¿Qué modelo se obtiene?","",["C = 50.11·e^(0.503t)","C = 3.91·e^(−0.503t)","C = 50.11·e^(−0.503t)","C = 50.11·e^(−0.605t)"],2,"Recta ln C vs t: pendiente −0.503, intercepto 3.914 → b = e^3.914 = 50.11."],
+["S","¿Qué secuencia de modelos lleva del sistema real al modelo que finalmente se programa?","",["Sistema real → modelo simplificado → modelo base → modelo computacional","Sistema real → modelo computacional → modelo base → modelo simplificado","Sistema real → modelo base → modelo simplificado → modelo computacional","Modelo base → sistema real → modelo computacional → modelo simplificado"],2,"Del sistema real se obtiene un modelo base completo, se simplifica y luego se programa."],
+["O","La solución actual de un sprint es {C, I, K}. Los movimientos permitidos son agregar, quitar o cambiar una historia. ¿Qué es el vecindario de esta solución?","",["Las soluciones que tienen el mismo valor de negocio","Las soluciones factibles de todo el backlog","Las soluciones que se obtienen con un solo movimiento","Las soluciones con las mismas historias y una más"],2,"El vecindario es todo lo alcanzable con un único movimiento."],
+["G","Grafo: A–B 4, A–C 2, B–C 1, B–D 5, C–D 8, C–E 10, D–E 2, D–F 6, E–F 3. Kruskal construye el árbol de expansión mínima. ¿Cuál es su peso total?","",["12","13","17","15"],1,"Se eligen B–C 1, A–C 2, D–E 2, E–F 3, se descarta A–B (ciclo) y se toma B–D 5: 1+2+2+3+5 = 13."],
+["R","Un equipo de 12 desarrolladores tiene 5 que dominan Python. Se elige un comité de 4 sin reemplazo. ¿Probabilidad de que exactamente 2 dominen Python?","",["0.2828","0.3613","0.5000","0.4242"],3,"Hipergeométrica: C(5,2)·C(7,2)/C(12,4) = 10·21/495 = 0.4242."],
+["A","Un sensor registra x: 2, 4, 6, 8 y y: 5, 9, 12, 16. Ajuste una recta y estime y para x = 10.","",["y = 1.0 + 1.9x; y(10) = 20.0","y = 1.5 + 1.8x; y(10) = 18.0","y = 1.8 + 1.5x; y(10) = 16.8","y = 1.5 + 1.8x; y(10) = 19.5"],3,"a₁ = 36/20 = 1.8; a₀ = 10.5 − 1.8·5 = 1.5; y(10) = 1.5 + 18 = 19.5."],
+["O","¿Qué imprime el código, que aplica un movimiento 2-opt?","ruta = ['C1', 'C2', 'C3', 'C4', 'C5']\ni, j = 1, 3\nnueva = ruta[:i] + ruta[i:j + 1][::-1] + ruta[j + 1:]\nprint(nueva)",["['C1', 'C3', 'C2', 'C4', 'C5']","['C1', 'C4', 'C3', 'C2', 'C5']","['C1', 'C4', 'C2', 'C3', 'C5']","['C4', 'C3', 'C2', 'C1', 'C5']"],1,"Se invierte el tramo de índices 1 a 3 (C2, C3, C4 → C4, C3, C2)."],
+["Y","¿Cuál es la separación entre dos valores consecutivos de t = np.linspace(15, 30, 101)?","",["0.15","0.1485","0.1","1.5"],0,"101 puntos forman 100 intervalos: (30 − 15)/100 = 0.15."],
+["E","La adopción de una app sigue A' = 0.35A(1 − A/100000) con A(0) = 500. ¿Cuántos usuarios estima un paso de Euler con h = 0.2 días?","",["500.2","535.0","570.0","534.8"],3,"A' = 0.35·500·0.995 = 174.125; A₁ = 500 + 0.2·174.125 = 534.8."],
+["P","En el grafo de alcanzabilidad de una red de Petri (nodos = marcados, arcos = disparos), ¿cómo se reconoce un estado de bloqueo?","",["Es el nodo que corresponde al marcado inicial M0","Es un nodo con semigrado de entrada igual a cero","Es un nodo con semigrado de salida igual a cero","Es un nodo que pertenece a un ciclo del grafo"],2,"Desde un bloqueo no se puede disparar nada: no sale ningún arco."],
+["O","En una búsqueda tabú, la historia A sale en la iteración 6. ¿En qué iteraciones queda prohibido mover A?","tenencia = 3\ntabu = {}\nk = 6\ntabu['A'] = k + tenencia          # se registra al mover A\n\ndef es_tabu(h, k):\n    return tabu.get(h, 0) >= k     # prohibido mientras k no supere el registro",["Solo en la 9","7 y 8","7, 8 y 9","6, 7 y 8"],2,"El registro vale 9; es tabú mientras k ≤ 9, es decir, en las iteraciones 7, 8 y 9."],
+["G","Un dígrafo tiene los arcos 1→2, 1→3, 2→3, 2→4, 3→4, 3→5, 4→5 y 5→1. ¿Qué valor tiene (A³)₁,₅?","",["3, el número de caminos de longitud 3 de 1 a 5","27, porque cada elemento de A se eleva al cubo","1, el número de caminos de longitud 3 de 1 a 5","3, la distancia más corta entre los vértices 1 y 5"],0,"Caminos de longitud 3: 1→2→3→5, 1→2→4→5 y 1→3→4→5."],
+["Y","¿Qué imprime el siguiente código?","m = np.arange(1, 10).reshape(3, 3)\nprint(m[:, -1])",["[7 8 9]","[1 4 7]","[3 6 9]","[4 5 6]"],2,"m[:, -1] es la última columna: 3, 6, 9."],
+["S","Un equipo comprueba que el programa reproduce sin errores las ecuaciones del modelo. Luego compara las salidas con mediciones de la planta real. Estas acciones son, en orden:","",["verificación y validación","validación y verificación","calibración y abstracción","formulación e implementación"],0,"Verificar: el código implementa bien el modelo. Validar: el modelo representa bien la realidad."],
+["N","Un generador congruencial con m = 100 produjo X₁ = 36. Si se normaliza con rᵢ = Xᵢ/(m − 1), ¿cuánto vale r₁?","",["0.3636","0.6364","0.3600","0.0036"],0,"36/99 = 0.3636."],
+["N","Una variable discreta tiene p(0) = 0.2, p(1) = 0.4, p(2) = 0.3 y p(3) = 0.1. Con el método tabular, ¿qué valor se genera con r = 0.65?","",["2","3","0","1"],0,"Acumuladas: 0.2, 0.6, 0.9, 1.0. 0.6 < 0.65 ≤ 0.9 → x = 2."],
+["S","Al repetir una simulación, los resultados quedan muy agrupados entre sí pero lejos del valor real. Esto corresponde a:","",["baja exactitud y baja precisión","alta precisión y baja exactitud","alta exactitud y baja precisión","alta exactitud y alta precisión"],1,"Agrupados = precisos; lejos del valor real = poco exactos."],
+["O","En la búsqueda tabú, ¿qué suele ocurrir si la tenencia es muy larga en un problema pequeño (por ejemplo 7 iteraciones con 12 historias)?","",["Quedan pocos movimientos permitidos y la búsqueda se estanca","La búsqueda vuelve enseguida a soluciones ya visitadas","El criterio de aspiración deja de tener efecto","Se garantiza el óptimo global en menos iteraciones"],0,"Con tantos movimientos prohibidos casi no quedan vecinos disponibles."],
+["Y","¿Qué muestra la última línea del siguiente código?","x = False\ny = True\nz = x and y\nz",["0","None","False","True"],2,"False and True = False."],
+["E","Para y' = y − t² + 1, y(0) = 0.5, se aplica un paso de Heun con h = 0.2. ¿Cuánto vale y₁?","",["0.829","0.852","0.800","0.826"],3,"f₀ = 1.5; predictor = 0.8; f(0.2, 0.8) = 1.76; y₁ = 0.5 + 0.1·(1.5 + 1.76) = 0.826."],
+["N","Con el método de convolución, N = (Σrᵢ − 6)σ + μ con 12 números. Si suman 6.8, μ = 12 y σ = 0.4, ¿qué valor se genera?","",["12.32","11.68","12.80","14.72"],0,"(6.8 − 6)·0.4 + 12 = 12.32."],
+["G","Un dígrafo tiene los arcos 1→2, 1→3, 2→3, 2→4, 3→4, 3→5, 4→5 y 5→1. ¿Cuáles son d⁻(4) y d⁺(4)?","",["d⁻(4) = 1 y d⁺(4) = 2","d⁻(4) = 3 y d⁺(4) = 1","d⁻(4) = 2 y d⁺(4) = 2","d⁻(4) = 2 y d⁺(4) = 1"],3,"Llegan 2→4 y 3→4 (entrada 2); sale 4→5 (salida 1)."],
+["O","Los algoritmos de optimización se agrupan en constructivos, de trayectoria y poblacionales. ¿Cuál es poblacional?","",["Descenso por gradiente","Enfriamiento simulado","Colonia de hormigas","Búsqueda tabú"],2,"Colonia de hormigas trabaja con muchas soluciones (hormigas) a la vez; las demás siguen una sola trayectoria."],
+["P","El proceso A pide los recursos R1 → R2 y el proceso B R2 → R1. Tras «A toma R1» y «B toma R2», nada queda habilitado. ¿Qué regla evita este bloqueo?","",["Que todos pidan los recursos en el mismo orden global","Que se agregue una marca más al lugar del recurso R1","Que el proceso B espere un tiempo fijo antes de tomar R2","Que cada proceso tome los dos recursos en orden aleatorio"],0,"Un orden global de petición elimina la espera circular."],
+["S","Se modela la caída de una piedra sin rozamiento con h(t) = h₀ − ½gt², evaluando la altura en cualquier instante. ¿Cómo se clasifica?","",["Determinístico y continuo","Estocástico y discreto","Estocástico y continuo","Determinístico y discreto"],0,"Sin aleatoriedad (determinístico) y el tiempo es continuo."],
+["Y","Se ejecuta plt.plot([1,2,3,4,5], [2.3,5.6,1.8,4.5,7.8], 'bs'). ¿Qué se dibuja?","",["Cinco círculos azules unidos por una línea","Una línea azul continua que une los puntos","Barras azules con altura igual a cada valor","Cinco cuadrados azules sin línea"],3,"'b' es azul y 's' es marcador cuadrado; sin estilo de línea no se unen."],
+["R","En Excel se escribe =1-DISTR.BINOM.N(9;15;0,4;VERDADERO). ¿Qué probabilidad calcula si X ~ Binomial(15; 0.4)?","",["P(X > 10)","P(X ≥ 10)","P(X ≤ 9)","P(X = 9)"],1,"1 − P(X ≤ 9) = P(X ≥ 10)."],
+["G","El grafo de flujo de control de una función tiene n = 9 nodos y m = 12 aristas. Con V(G) = m − n + 2, ¿cuántos casos de prueba se necesitan como mínimo?","",["21","3","4","5"],3,"12 − 9 + 2 = 5."],
+["A","Ajuste y = b·e^(mx) a x: 0, 1, 2, 3, 4 y y: 2.0, 3.3, 5.4, 9.0, 14.8, linealizando con ln y. ¿Qué modelo se obtiene?","",["y = 1.997·e^(0.501x)","y = 0.501·e^(1.997x)","y = 1.997·e^(1.650x)","y = 0.692·e^(0.501x)"],0,"Recta ln y vs x: pendiente 0.501, intercepto 0.692 → b = e^0.692 = 1.997."],
+["A","Ajuste y = a₀ + a₁x₁ + a₂x₂ a x₁: 0,1,1,2,2,3,3,4,4; x₂: 0,1,2,1,2,1,2,1,2; y: 15.1, 17.9, 12.7, 25.6, 20.5, 35.1, 29.7, 45.4, 40.2. ¿Qué modelo se obtiene?","",["y = 9.025 + 14.461x₁ − 5.704x₂","y = 14.461 + 5.704x₁ − 9.025x₂","y = 14.461 + 9.025x₁ − 5.704x₂","y = 14.461 − 9.025x₁ + 5.704x₂"],2,"y crece ~9 por unidad de x₁ y baja ~5.7 por unidad de x₂; con x₁ = x₂ = 0, y ≈ 14.5."],
+["O","Se minimiza f(x) = (x − 3)² + 2, f'(x) = 2(x − 3), con descenso por gradiente desde x₀ = 0 y η = 0,25. ¿Cuánto vale x₂?","",["1,50","3,00","2,63","2,25"],3,"x₁ = 0 − 0.25·(−6) = 1.5; x₂ = 1.5 − 0.25·(−3) = 2.25."],
+["N","Un generador usa Xᵢ₊₁ = (5Xᵢ + 3) mod 16 con X₀ = 7. ¿Cuánto vale X₃?","",["11","6","1","8"],3,"X₁ = 38 mod 16 = 6; X₂ = 33 mod 16 = 1; X₃ = 8."],
+["R","La función f(x) = kx para 0 ≤ x ≤ 2 (0 fuera) es una densidad. ¿Cuánto debe valer k?","",["1","1/2","1/4","2"],1,"∫₀² kx dx = 2k = 1 → k = 1/2."],
+["O","En un enfriamiento simulado de minimización, el vecino empeora en Δ = 2 con T = 0,64 y u = 0,31. Se acepta si u < e^(−Δ/T). ¿Qué se decide?","",["Se rechaza, porque p ≈ 0,31","Se acepta, porque Δ es positivo","Se acepta, porque p ≈ 0,44","Se rechaza, porque p ≈ 0,044"],3,"e^(−2/0.64) = e^(−3.125) ≈ 0.044 < 0.31 → se rechaza."],
+["P","Una transición t tiene entradas desde P1 (peso 2) y P3 (peso 1) y salida a P2 (peso 1). Con M = (P1, P2, P3) = (3, 0, 1), ¿qué marcado se obtiene al disparar t?","",["(3,1,0)","(1,1,1)","(2,1,0)","(1,1,0)"],3,"P1: 3 − 2 = 1; P2: 0 + 1 = 1; P3: 1 − 1 = 0."],
+["G","Teorema de Dirac: si n ≥ 3 y d(v) ≥ n/2 para todo vértice, el grafo es hamiltoniano. El grafo de Petersen (n = 10, grados 3) no cumple la condición. ¿Qué se concluye?","",["Que el grafo es hamiltoniano porque es 3-regular","Que el grafo no es hamiltoniano porque 3 < 5","Que el grafo tiene un ciclo euleriano en su lugar","Nada: la condición es suficiente, no necesaria"],3,"Dirac solo da una condición suficiente; si no se cumple, el teorema no dice nada."],
+["Y","Dada ciudades = ['Manta', 'Milagro', 'Bucay', 'La Troncal', 'Babahoyo'], ¿qué elimina ciudades.pop(-3)?","",["'Milagro'","'Bucay'","'La Troncal'","'Babahoyo'"],1,"El índice −3 en una lista de 5 es el índice 2: 'Bucay'."],
+["S","Un modelo construido con ecuaciones diferenciales, en el que la misma entrada produce siempre la misma salida, se clasifica como:","",["estocástico","icónico","determinístico","conceptual"],2,"Misma entrada → misma salida: determinístico."],
+["R","En la simulación de dos dados se cuenta cuántas veces la suma es mayor que 8. ¿A qué valor teórico tiende la probabilidad estimada?","",["6/36 ≈ 0.167","4/36 ≈ 0.111","15/36 ≈ 0.417","10/36 ≈ 0.278"],3,"Suma 9: 4, 10: 3, 11: 2, 12: 1 → 10/36."],
+["R","¿Qué condición distingue a la distribución hipergeométrica de la binomial?","",["Los ensayos tienen tres resultados","La probabilidad de éxito es fija","El número de ensayos no es fijo","La muestra se extrae sin reemplazo"],3,"Sin reemplazo la probabilidad cambia en cada extracción."],
+["N","El método de cuadrados medios con semillas «redondas», como 1000, suele producir secuencias que se quedan en cero o en un ciclo corto. ¿Cómo se llama este problema?","",["Rechazo en la prueba de medias","Degeneración de la secuencia","Periodo completo del generador","Correlación entre semillas"],1,"La secuencia degenera."],
+["S","El paso en el que se representa el sistema real con sus rasgos relevantes para construir el modelo computacional se llama:","",["experimentación","comparación","calibración","abstracción"],3,"Abstraer es quedarse con los rasgos relevantes del sistema."],
+["E","¿Cuántas evaluaciones de f(t, y) necesitan por paso Heun y Runge-Kutta de cuarto orden, respectivamente?","",["2 y 3","1 y 4","2 y 4","1 y 2"],2,"Heun: predictor + corrector = 2. RK4: k₁…k₄ = 4."],
+["G","Un grafo no dirigido tiene V = {1,…,7} y aristas {1,2}, {2,4}, {2,7}, {3,5}, {3,6}, {4,5}, {4,6}, {4,7}, {5,6}, {6,7}. ¿Cuánto suman los grados?","",["7","10","20","14"],2,"Suma de grados = 2m = 2·10 = 20."],
+["A","Se ajusta y = b·e^(mx). ¿Qué transformación lo convierte en una recta y cómo se recuperan sus parámetros?","",["ln y contra ln x; m = a₁ y b = e^a₀","1/y contra 1/x; m = 1/a₀ y b = a₁","y contra ln x; m = a₀ y b = a₁","ln y contra x; m = a₁ y b = e^a₀"],3,"ln y = ln b + m·x: recta en (x, ln y) con pendiente m e intercepto ln b."],
+["O","¿Qué valores de w y b imprime el código, que da un paso de descenso por gradiente a una neurona lineal?","import numpy as np\nx = np.array([1.0, 2.0])\ny = np.array([3.0, 5.0])\nw, b, eta = 0.0, 0.0, 0.1\nerror = y - (w * x + b)\ndw = -2 / len(x) * np.sum(x * error)\ndb = -2 / len(x) * np.sum(error)\nw -= eta * dw\nb -= eta * db\nprint(round(w, 2), round(b, 2))",["1.3 0.8","0.8 1.3","13.0 8.0","-1.3 -0.8"],0,"error = [3, 5]; dw = −(3 + 10) = −13; db = −8; w = 1.3, b = 0.8."],
+["A","Con 6 puntos se ajusta un polinomio de grado 5 y se obtiene r² = 1. ¿Cómo se interpreta?","",["Es el mejor modelo posible porque no tiene ningún error de ajuste","El grado 5 garantiza buenas predicciones fuera del rango de los datos","El modelo es lineal en la variable y por eso pasa por todos los puntos","Interpola los puntos, incluido el ruido, y no generaliza mejor"],3,"Con n puntos, un polinomio de grado n − 1 los interpola exactamente: sobreajuste."],
+["O","En el enfriamiento simulado, ¿qué ocurre cuando la temperatura T es alta?","",["La búsqueda se reinicia desde otro punto","Solo se aceptan soluciones que mejoran","Se aceptan con frecuencia soluciones peores","Se rechazan todas las soluciones vecinas"],2,"e^(−Δ/T) es cercano a 1 con T alta: se aceptan muchos empeoramientos (exploración)."],
+["P","En una red de Petri de una tienda en línea, «pedido pagado» es un lugar y «pagar» una transición. ¿Qué representa una marca en «pedido pagado»?","",["La cantidad de arcos que salen del lugar hacia otras transiciones","Una unidad de esa condición: un pedido que ya está pagado","El estado completo del sistema en un instante determinado","Un evento que ocurre cuando el cliente pulsa el botón pagar"],1,"Cada marca es una instancia de la condición del lugar."],
+["Y","¿Qué devuelve el siguiente código?","import numpy as np\nx = [0, 1, 2, 3]\ny = [1, 3, 5, 7]\nprint(np.polyfit(x, y, 1))",["[1. 2.], es decir, pendiente 1 e intercepto 2","[2. 1. 0.], coeficientes de un polinomio de grado 2","[1. 2.], es decir, intercepto 1 y pendiente 2","[2. 1.], es decir, pendiente 2 e intercepto 1"],3,"polyfit devuelve de mayor a menor grado: [pendiente, intercepto] = [2, 1]."],
+["E","Un malware se propaga según dI/dt = βSI/N − γI, con N = 1000, β = 0.4, γ = 0.1, S(0) = 995 e I(0) = 5. ¿Cuánto vale dI/dt en t = 0?","",["2.49 equipos/día","1.99 equipos/día","0.50 equipos/día","1.49 equipos/día"],3,"0.4·995·5/1000 − 0.1·5 = 1.99 − 0.5 = 1.49."],
+["N","En la prueba de medias con n = 100 y α = 0.05, el intervalo de aceptación es (0.4434; 0.5566). Si r̄ = 0.46, ¿qué se concluye?","",["Se rechaza porque 0.46 es menor que 0.5","Hay que aplicar antes la prueba de varianza","Se acepta que la media es 0.5","Se rechaza porque el intervalo es angosto"],2,"0.46 está dentro del intervalo → no se rechaza H₀: μ = 0.5."],
+["G","El ciclo C₆ y la unión de dos triángulos disjuntos C₃ ∪ C₃ tienen 6 vértices, 6 aristas y todos los grados 2. ¿Son isomorfos?","",["No, porque C₆ tiene más aristas que los dos triángulos","Sí, porque ambos grafos son 2-regulares y no dirigidos","Sí, porque coinciden n, m y la secuencia de grados","No: C₆ es conexo y el otro tiene dos componentes"],3,"El número de componentes conexas es un invariante: 1 ≠ 2."],
+["O","g(x) = x⁴ − 4x² + x tiene un mínimo global cerca de x = −1,47 y uno local cerca de x = 1,35. Con descenso por gradiente, η = 0,01, desde x₀ = 2, ¿qué ocurre?","",["Diverge porque g tiene dos mínimos","Oscila entre los dos mínimos sin parar","Llega al mínimo global cercano a −1,47","Llega al mínimo local cercano a 1,35"],3,"Con paso pequeño baja por la pendiente más cercana y se queda en el mínimo local de la derecha."],
+["N","Un volumen es normal con μ = 12 y σ = 0.4. Con Box-Muller, N = √(−2 ln(1 − rᵢ))·sin(2πrⱼ)·σ + μ. ¿Qué valor se obtiene con rᵢ = 0.43 y rⱼ = 0.75?","",["12.00 onzas","11.94 onzas","12.42 onzas","11.58 onzas"],3,"√(−2 ln 0.57) = 1.060; sin(1.5π) = −1 → 12 − 1.060·0.4 = 11.58."],
+["S","Que un modelo sea «evolutivo» significa que:","",["se adapta solo a los cambios del sistema real sin ajustes","incluye desde el inicio todos los detalles del sistema","permite modificar sus parámetros con un procedimiento simple","empieza sencillo y se vuelve más complejo con el tiempo"],3,"Un modelo evolutivo arranca simple y se enriquece gradualmente."],
+["G","Grafo: A–B 4, A–C 2, B–C 1, B–D 5, C–D 8, C–E 10, D–E 2, D–F 6, E–F 3. Según Dijkstra, ¿cuál es la ruta más corta de A a F?","",["A–C–B–D–E–F con peso 13","A–B–D–F con peso 15","A–C–E–F con peso 15","A–B–D–E–F con peso 14"],0,"2 + 1 + 5 + 2 + 3 = 13."],
+["O","Algunos voraces sí garantizan el óptimo. ¿Cuál NO lo garantiza?","",["Dijkstra para la ruta más corta","Huffman para códigos de longitud mínima","El vecino más cercano en el viajante","Kruskal para el árbol de expansión mínima"],2,"El vecino más cercano es una heurística para el TSP y puede dar rutas malas."],
+["S","En las cajas de un supermercado, el tiempo promedio que espera un cliente, calculado al final del día, es una variable:","",["endógena de salida","endógena de estado","exógena controlable","exógena no controlable"],0,"Se produce dentro del sistema y es un resultado final: endógena de salida."],
+["O","Dos clientes están a 1 km y 2 km, con feromonas τ = 1 y τ = 3. Con α = β = 1 en pᵢⱼ ∝ τ^α·(1/d)^β, ¿probabilidad de ir al cliente a 1 km?","",["0,67","0,40","0,25","0,60"],1,"Pesos: 1·1 = 1 y 3·0.5 = 1.5 → 1/2.5 = 0.40."],
+["R","A una mesa de ayuda llegan 6 tickets por hora (Poisson). ¿Probabilidad de que en 15 minutos no llegue ninguno?","",["0.7769","0.0025","0.1500","0.2231"],3,"λ = 6·0.25 = 1.5 → P(0) = e^(−1.5) = 0.2231."],
+["Y","Se generan datos con X = np.random.normal(0, 1, 1024). ¿Qué contiene X?","",["1024 enteros aleatorios que solo pueden ser 0 o 1","1024 valores normales con media 0 y desviación 1","1024 valores uniformes en el intervalo de 0 a 1","Un valor normal con media 1 y desviación 1024"],1,"normal(media, desviación, tamaño)."],
+["A","Un ajuste cuadrático dio y = 0.9907 + 0.4499x − 0.0307x². ¿Qué forma tiene la parábola y dónde está su vértice, xᵥ = −a₁/(2a₂)?","",["Cóncava hacia arriba, con un mínimo en x ≈ 3.66","Cóncava hacia abajo, con un máximo en x ≈ 14.65","Cóncava hacia arriba, con un mínimo en x ≈ 7.33","Cóncava hacia abajo, con un máximo en x ≈ 7.33"],3,"a₂ < 0 → abre hacia abajo (máximo). xᵥ = −0.4499/(−0.0614) = 7.33."],
+["Y","¿Qué imprime este código?","numeros = [10, 20, 30, 40, 50]\nprint(random.shuffle(numeros))",["Un error de tipo","La lista mezclada","[10, 20, 30, 40, 50]","None"],3,"shuffle mezcla en su lugar y devuelve None."],
+["P","En esa red se agrega T5→P1 para que funcione de forma cíclica. P7 recibe una marca cada vez que se dispara T1 y no tiene arcos de salida. ¿Qué propiedad pierde la red?","",["Deja de ser bipartita, porque aparece un arco entre lugares","Deja de tener conflicto, porque T5 ya no compite por P5","Deja de ser viva, porque P7 bloquea a la transición T1","Deja de ser acotada, porque P7 crece en cada ciclo"],3,"P7 acumula una marca por ciclo sin límite: la red no es acotada."],
+["O","Cinco trabajos duran 8, 7, 6, 5 y 4 min y se reparten en 2 servidores con LPT (mayor a menor, al servidor con menos carga; en empate, al primero). ¿Cuál es el makespan?","",["15 minutos","17 minutos","18 minutos","13 minutos"],1,"S1: 8; S2: 7; S2: 13; S1: 13; empate → S1: 17. Makespan = 17."],
+["R","El tiempo de respuesta de una API es normal con media 250 ms y desviación 40 ms. ¿Probabilidad de tardar más de 300 ms?","",["0.0401","0.1056","0.8944","0.2266"],1,"z = 1.25 → 1 − 0.8944 = 0.1056."],
+["E","Una EDO de cuarto orden se reduce a un sistema de primer orden. ¿Cuántas condiciones iniciales hacen falta y de qué tamaño es el vector de estado?","",["4 condiciones y un vector de 4","4 condiciones y un vector de 1","1 condición y un vector de 4","3 condiciones y un vector de 4"],0,"Estado [y, y', y'', y'''] y una condición inicial por componente."],
+["N","Dos personas ejecutan el mismo generador congruencial con los mismos a, c, m y la misma semilla X₀. ¿Qué obtienen?","",["Secuencias con la misma media","Exactamente la misma secuencia","Secuencias distintas, pero uniformes","La misma secuencia en orden inverso"],1,"Es determinístico: misma semilla y parámetros → misma secuencia."],
+["S","En las cajas de un supermercado, la cantidad de clientes que llegan por hora es una variable:","",["exógena no controlable","endógena de salida","endógena de estado","exógena controlable"],0,"Viene de fuera del sistema y no la decide el gerente."],
+["Y","Las presiones se guardan en hPa. ¿Qué instrucción crea una lista con los mismos valores en Pa (1 hPa = 100 Pa)?","",["presiones_pa = [presiones * 100]","presiones_pa = [p / 100 for p in presiones]","presiones_pa = presiones * 100","presiones_pa = [p * 100 for p in presiones]"],3,"La comprensión multiplica cada elemento; lista * 100 repetiría la lista 100 veces."],
+["A","Dado fa(x) = x³ − 6x² + 11x − 6.1, ¿cuánto vale fa(2)?","",["0.1","−6.1","0","−0.1"],3,"8 − 24 + 22 − 6.1 = −0.1."],
+["A","Ajuste y = a₀ + a₁x + a₂x² a x: −2, −1, 0, 1, 2 y y: 4.1, 0.9, 0.1, 1.2, 3.9. ¿Qué modelo se obtiene?","",["y = 0.083 + 0.010x − 0.979x²","y = 0.083 − 0.010x + 0.979x²","y = 2.040 − 0.010x","y = 0.979 − 0.010x + 0.083x²"],1,"Los datos forman una parábola que abre hacia arriba con mínimo ≈ 0.1 en x = 0."],
+["O","¿Qué afirmación describe mejor la diferencia entre heurística y metaheurística?","",["La metaheurística guía heurísticas y tiene formas de escapar de óptimos locales","La metaheurística sirve solo para un problema concreto, la heurística para muchos","La heurística explora todo el espacio y la metaheurística solo una parte","La heurística garantiza el óptimo y la metaheurística solo se acerca a él"],0,"La metaheurística es una estrategia general que guía heurísticas y escapa de óptimos locales."],
+["O","Una búsqueda local con intercambio de dos clientes mejora una ruta de 34,55 km a 22,27 km y se detiene. El óptimo (21,37 km) se obtiene moviendo un cliente del final al inicio. ¿Por qué no lo encontró?","",["El intercambio de dos clientes siempre empeora la ruta","Ese cambio no se logra con un intercambio sin empeorar antes","El óptimo no cumple la restricción de visitar a todos","La búsqueda local no acepta rutas de más de 7 clientes"],1,"Quedó en un óptimo local: llegar al óptimo exige pasar por soluciones peores."],
+["G","En Königsberg, d(A) = 5, d(B) = 3, d(C) = 3 y d(D) = 3. Según Euler, el recorrido que cruza cada puente una sola vez:","",["existe como ciclo euleriano que vuelve a A","existe solo si se empieza en una zona de grado 3","existe como camino euleriano que empieza en A","no existe como camino ni como ciclo euleriano"],3,"Hay 4 vértices de grado impar; un camino euleriano admite como máximo 2."],
+["G","¿Cuál de los siguientes grafos NO es bipartito?","",["El bipartito completo K₃,₃","Un camino de 5 vértices","El ciclo de 5 vértices C₅","El ciclo de 6 vértices C₆"],2,"Un grafo es bipartito si no tiene ciclos impares; C₅ es un ciclo impar."],
+["N","¿Qué imprime el código, que aplica el método tabular?","import numpy as np\nx = [0, 1, 2, 3]\nF = np.cumsum([0.2, 0.4, 0.3, 0.1])   # [0.2, 0.6, 0.9, 1.0]\n\ndef generar(r):\n    for xi, Fi in zip(x, F):\n        if r <= Fi:\n            return xi\n\nprint([generar(r) for r in [0.15, 0.6, 0.61, 0.95]])",["[1, 1, 2, 3]","[0, 2, 2, 3]","[0, 1, 1, 3]","[0, 1, 2, 3]"],3,"0.15 ≤ 0.2 → 0; 0.6 ≤ 0.6 → 1; 0.61 ≤ 0.9 → 2; 0.95 ≤ 1.0 → 3."],
+["A","Se ajusta una recta a los puntos (−3, 3), (−1, 2), (0, 1), (1, −1) y (3, −4). ¿Cuál es el modelo?","",["y = 0.2 − 1.0x","y = 0.2 − 1.2x","y = −0.2 + 1.2x","y = 1.0 − 1.2x"],1,"x̄ = 0, ȳ = 0.2; Sxy = −24, Sxx = 20 → pendiente −1.2."],
+["S","Un sistema se define como:","",["un conjunto de ecuaciones que predicen el comportamiento de un fenómeno real","un conjunto de experimentos hechos en computadora para estudiar un proceso","un conjunto de elementos unidos por relaciones de interacción","un conjunto de variables de entrada controladas por el operador del proceso"],2,"Definición de sistema: elementos que interactúan."],
+["Y","¿Qué forma tiene X?","x = np.arange(-5, 5, 0.2)\ny = np.arange(-4, 4, 0.2)\nX, Y = np.meshgrid(x, y)",["(40, 40)","(40, 50)","(50, 50)","(50, 40)"],1,"len(x) = 50 y len(y) = 40; meshgrid devuelve (len(y), len(x)) = (40, 50)."],
+["N","Una variable continua tiene F(x) = x² para 0 ≤ x ≤ 1. Con la transformada inversa, ¿qué valor se genera con r = 0.36?","",["0.60","0.36","0.13","0.18"],0,"x = √r = √0.36 = 0.60."],
+["P","Con 10 t de orgánico y pilas que consumen 2 t de orgánico y 1 t de seco cada una, ¿cuánto seco se necesita para aprovechar todo el orgánico?","",["20 t","3 t","5 t","10 t"],2,"10/2 = 5 pilas → 5 t de seco."],
+["N","Si R ~ U(0, 1), ¿cuáles son la media y la varianza teóricas que debe aproximar una buena secuencia pseudoaleatoria?","",["0.5 y 1/12","0.5 y 1/2","0.5 y 1/6","1 y 1/12"],0,"Uniforme(0, 1): media 1/2, varianza 1/12."],
+["S","¿Qué describe un modelo?","",["La lista de recursos físicos que necesita el sistema para funcionar","La secuencia de etapas que se siguen para implementar una simulación","Los experimentos que se ejecutan en computadora para predecir resultados","Cómo responde el sistema a cambios internos o de su ambiente"],3,"Un modelo describe la respuesta del sistema a cambios internos o externos."],
+["R","Los barcos llegan según Poisson con media 4 por día. ¿Probabilidad de que entre dos llegadas pasen menos de 4 horas?","",["0.6321","0.4866","0.1535","0.9817"],1,"Exponencial con λ = 4/día; 4 h = 1/6 día → 1 − e^(−4/6) = 0.4866."],
+["O","En el árbol de búsqueda de un sprint de 8 puntos, la rama con A (4) e I (5) ya suma 9. ¿Qué hace la poda?","",["Guarda la rama como un óptimo local provisional del sprint","Retrocede a la raíz y reinicia todo el árbol","Descarta esa rama sin explorar sus soluciones","Quita la historia de mayor valor y continúa"],2,"La rama es infactible: se poda sin explorar sus descendientes."],
+["S","En el proceso de modelado y simulación, ¿qué etapa sigue inmediatamente a la implementación del modelo?","",["Experimentación","Validación","Diseño de experimentos","Verificación"],3,"Tras programar se verifica que el código hace lo que el modelo dice."],
+["E","El error global de RK4 es O(h⁴). Si el paso se reduce de h a h/2, ¿por cuánto se divide el error?","",["Por 2","Por 8","Por 16","Por 4"],2,"(1/2)⁴ = 1/16."],
+["Y","Para A = [[2, 1], [1, 3]] y B = [[4, 2], [0, 5]], ¿qué devuelve A @ B?","",["[[8, 9], [4, 17]]","[[10, 10], [5, 15]]","[[6, 3], [1, 8]]","[[8, 2], [0, 15]]"],0,"Fila 1: [2·4 + 1·0, 2·2 + 1·5] = [8, 9]; fila 2: [4, 2 + 15] = [4, 17]."],
+["S","«Las cosas se deben hacer tan simples como sea posible, pero no demasiado simples». Aplicado al modelado, el modelo debe:","",["conservar solo lo necesario sin dejar de representar el sistema","evitar las suposiciones de linealidad porque siempre producen errores grandes","incluir todas las variables del sistema para que los resultados sean exactos","reducirse al mínimo de ecuaciones aunque deje de representar el sistema real"],0,"Simplicidad sin perder representatividad."],
+["P","En la misma red (T1 necesita una marca en P1 y otra en P6; ninguna transición deposita marcas en P1), tras disparar T1…T5 la marca vuelve a P6. ¿Qué ocurre después?","",["Se bloquea: T1 también necesita una marca en P1","La red sigue funcionando porque P7 repone la marca de P1","La red se desborda porque P6 acumula marcas sin límite","T1 se dispara otra vez porque P6 tiene de nuevo su marca"],0,"P1 quedó vacío y nadie lo repone: T1 no puede volver a dispararse."],
+["N","¿Por qué para variables discretas se usa el método tabular en lugar de despejar x = F⁻¹(r)?","",["Porque F(x) de una discreta es siempre lineal","Porque p(x) puede ser mayor que 1","Porque los r discretos no son uniformes","Porque F(x) es escalonada y no se puede invertir"],3,"F escalonada no es biyectiva: se busca el intervalo donde cae r."],
+["O","Una búsqueda local de ascenso de colinas con mejor mejora evalúa todos los vecinos. ¿Cuándo se detiene?","",["Cuando revisa todas las soluciones del espacio","Cuando el mejor vecino empeora en más del 10 %","Cuando ningún vecino mejora a la solución actual","Cuando la lista de movimientos prohibidos se llena"],2,"Se detiene en un óptimo local."],
+["A","El tiempo de entrega (min) se modela con ŷ = 2.3412 + 1.6159x₁ + 0.014385x₂ (x₁ cajas, x₂ distancia en pies). Con las mismas cajas, ¿cuánto agregan 100 pies?","",["Unos 0.014 min","Unos 3.78 min","Unos 1.62 min","Unos 1.44 min"],3,"100·0.014385 = 1.44 min."],
+["O","Un tramo tiene τ = 0,8. Con ρ = 0,3 y Q = 10, primero se evapora (τ ← (1 − ρ)τ) y luego lo refuerzan dos hormigas con rutas de 20 km y 25 km (Q/L cada una). ¿Nuevo τ?","",["1,70","1,14","0,56","1,46"],3,"0.7·0.8 = 0.56; + 10/20 + 10/25 = 0.56 + 0.5 + 0.4 = 1.46."],
+["E","El método de Euler centrado usa yᵢ₊₁ = yᵢ₋₁ + 2h·f(tᵢ, yᵢ). ¿Cómo se obtiene y₁ si solo se conoce y₀?","",["Con un paso del método de Euler","Con la misma fórmula, tomando y₋₁ = 0","Con un paso de Runge-Kutta de cuarto orden","Con la solución analítica en t₁"],0,"Es un método de dos pasos: se arranca con un paso de Euler simple."],
+["R","Monte Carlo para π: 10 000 puntos en [−1, 1]×[−1, 1] y 7 850 cumplen x² + y² ≤ 1. ¿Estimación de π?","",["6.28","3.14","0.785","1.57"],1,"Área círculo/cuadrado = π/4 → π ≈ 4·0.785 = 3.14."],
+["Y","¿Qué imprime la siguiente lista por comprensión?","print([t**2 for t in range(5)])",["[1, 4, 9, 16, 25]","[0, 2, 4, 6, 8]","[0, 1, 4, 9, 16]","[0, 1, 4, 9, 16, 25]"],2,"range(5) es 0…4; sus cuadrados: 0, 1, 4, 9, 16."],
+["S","El conjunto de relaciones de un modelo puede expresarse mediante:","",["solo tablas de datos medidos en el sistema real","únicamente programas escritos en un lenguaje formal","ecuaciones, gráficos, tablas o causa-efecto","únicamente ecuaciones diferenciales ordinarias"],2,"Las relaciones admiten muchas representaciones."],
+["R","Los builds fallidos en un día siguen una Binomial con n = 12 y p = 0.1. ¿Media y desviación estándar?","",["1.2 y 1.04","12 y 0.95","1.2 y 1.08","1.08 y 1.2"],0,"Media np = 1.2; varianza np(1−p) = 1.08 → desviación = 1.04."],
+["N","Con el generador multiplicativo Xᵢ₊₁ = 21·Xᵢ mod 32 y X₀ = 17, ¿cuánto vale X₁?","",["21","13","17","5"],3,"21·17 = 357; 357 − 11·32 = 5."],
+["N","¿Cuál de estos generadores puede producir un periodo mayor que el módulo m?","",["El de cuadrados medios","El congruencial multiplicativo","El congruencial aditivo","El congruencial lineal mixto"],2,"El aditivo usa varios valores anteriores (Xᵢ₋₁ + Xᵢ₋ₙ), así que su estado no es un solo número y el periodo puede superar m."],
+["S","La maqueta a escala de un edificio, que reproduce su forma pero no su funcionamiento, es un ejemplo de modelo físico:","",["icónico","analógico","conceptual","estocástico"],0,"Se parece físicamente al original (a escala): icónico."],
+["R","Si X es una variable aleatoria continua con densidad f(x), ¿cuánto vale P(X = 4)?","",["0","F(4)","1 − F(4)","f(4)"],0,"En una continua la probabilidad de un punto exacto es 0 (integral sobre un intervalo de ancho cero)."],
+["R","Una línea tiene 5 % de piezas defectuosas. Se inspeccionan 20 y se detiene la línea si hay 2 o más defectuosas. ¿Probabilidad de detenerla?","",["0.2642","0.3774","0.7358","0.1887"],0,"1 − P(0) − P(1) = 1 − 0.3585 − 0.3774 = 0.2642."],
+["O","¿Por qué el descenso por gradiente no se puede aplicar directamente para ordenar las visitas de un técnico a sus clientes?","",["El orden de visita no es una variable continua y derivable","La distancia total de la ruta no tiene ningún mínimo global","Con más de 10 clientes la derivada siempre es cero","El gradiente solo funciona en problemas de maximizar"],0,"Un orden es una permutación (discreta): no hay derivada."],
+["E","rk4(T, X0, F, n) devuelve X con una fila por instante y una columna por variable. Se resuelve un SIR de 3 ecuaciones con n = 300. ¿Qué forma tiene X?","",["(300, 3)","(301, 3)","(3, 301)","(301,)"],1,"n = 300 pasos dan 301 instantes (incluido t₀), y hay 3 variables."],
+["P","En la red temporizada de la planta, los lotes se acumulan en el lugar «Pretratado» esperando un cupo del reactor. ¿Qué indica esa acumulación?","",["Que el reactor (lento y limitado) es el cuello de botella","Que la sedimentación es el cuello de botella por durar 2 horas","Que el pretratamiento debe ampliarse porque no tiene límite","Que la red está bloqueada y ningún lote llega a la descarga"],0,"La cola se forma justo antes del recurso que limita el flujo: el reactor."],
+["S","Si los sistemas se clasifican según el conocimiento que se tiene de ellos y la calidad de los datos, los determinísticos corresponden al caso en que:","",["el conocimiento del sistema es bajo y la calidad de datos es baja","la calidad de datos es baja aunque el conocimiento sea alto","el conocimiento del sistema es alto y la calidad de datos también","el conocimiento del sistema es bajo y la calidad de datos es alta"],2,"Con conocimiento alto y buenos datos se puede formular un modelo determinístico."],
+["Y","¿Qué disposición de subgráficos crea plt.subplot(311)?","",["Una cuadrícula de 3 × 3, activando la posición 11","Tres filas y una columna, activando el primer subgráfico","Una fila y tres columnas, activando el primer subgráfico","Tres filas y una columna, activando el tercer subgráfico"],1,"311 = (3 filas, 1 columna, posición 1)."],
+["Y","¿Qué rango de valores puede devolver random.randint(1, 6)?","",["Enteros del 1 al 6, ambos incluidos","Enteros del 1 al 5, sin incluir el 6","Decimales entre 1.0 y 6.0, ambos incluidos","Enteros del 0 al 6, ambos incluidos"],0,"randint incluye ambos extremos (a diferencia de range)."],
+["O","Para f(x) = (x − 3)² + 2 se cumple xₖ₊₁ − 3 = (1 − 2η)(xₖ − 3). ¿Con cuál de estas tasas converge el método?","",["η = 1,2","η = 1,05","η = 1,5","η = 0,9"],3,"Converge si |1 − 2η| < 1, es decir 0 < η < 1. Con 0,9: |1 − 1,8| = 0,8."],
+["E","Para y' = y − t² + 1, y(0) = 0.5, se aplica un paso de Euler con h = 0.2. ¿Cuánto vale y₁?","",["0.700","0.800","0.826","0.829"],1,"f(0, 0.5) = 0.5 − 0 + 1 = 1.5; y₁ = 0.5 + 0.2·1.5 = 0.8."],
+["Y","¿Qué instrucción falta en la línea ??? para crear los ejes 3D?","fig = plt.figure(figsize=(8, 6))\n???\nsuperficie = ax.plot_surface(X, Y, Z, cmap='viridis')\nfig.colorbar(superficie, shrink=0.5, aspect=10)\nplt.show()",["ax = plt.subplot(1, 1, 1, mode='3d')","ax = fig.add_subplot(111, cmap='3d')","ax = fig.add_subplot(111, projection='3d')","ax = plt.plot(X, Y, projection='3d')"],2,"Los ejes 3D se crean con projection='3d'."],
+["Y","Se ejecuta a = np.arange(3, 12, 0.1) y luego print(a.shape). ¿Qué se obtiene?","",["(90, 1)","(90,)","(9,)","(91,)"],1,"(12 − 3)/0.1 = 90 elementos (el 12 no se incluye) en un arreglo 1D."],
+["N","La temperatura de una estufa es uniforme entre 95 y 100 °C y se genera con x = a + (b − a)r. ¿Qué valor se obtiene con r = 0.48?","",["97.60 °C","99.52 °C","95.48 °C","97.40 °C"],3,"95 + 5·0.48 = 97.40."],
+["O","En la colonia de hormigas, ¿para qué sirve la evaporación de la feromona?","",["Para reforzar los tramos de las rutas más cortas","Para olvidar tramos poco usados y no estancarse","Para que cada hormiga elija siempre al cliente más cercano","Para contar cuántas hormigas pasaron por cada tramo"],1,"La evaporación borra rastros viejos y evita la convergencia prematura."],
+["P","¿Cuándo está habilitada una transición t en el marcado M?","",["Cuando cada lugar de salida p cumple M(p) ≥ Post(p,t)","Cuando todos los lugares de la red tienen alguna marca","Cuando cada lugar de entrada p cumple M(p) ≥ Pre(p,t)","Cuando al menos un lugar de entrada tiene una marca o más"],2,"Todo lugar de entrada debe tener al menos tantas marcas como el peso de su arco."],
+["R","Un módulo tiene 2000 líneas y cada una tiene un defecto con probabilidad 0.001. Con la aproximación de Poisson, ¿probabilidad de exactamente 3 defectos?","",["0.3233","0.1804","0.2707","0.0613"],1,"λ = 2000·0.001 = 2 → e⁻²·2³/3! = 0.1804."],
+["S","En una agencia bancaria los clientes llegan al azar y la fila cambia solo cuando alguien llega o sale. ¿Qué tipo de modelo lo representa mejor?","",["Determinístico y continuo","Estocástico y discreto","Estocástico y continuo","Determinístico y discreto"],1,"Llegadas al azar (estocástico) y cambios solo en eventos puntuales (discreto)."],
+["N","¿Por qué a los números generados con Xᵢ₊₁ = (aXᵢ + c) mod m se les llama pseudoaleatorios?","",["Porque solo toman valores enteros","Porque no siguen una distribución uniforme","Porque salen de una fórmula determinista","Porque nunca repiten ningún valor"],2,"Parecen aleatorios, pero una fórmula los determina por completo."],
+["S","Una aerolínea entrena a sus pilotos en un simulador de vuelo del A320 en lugar de un avión real. ¿Qué ventaja de la simulación aprovecha?","",["Eliminar por completo el costo de desarrollar y mantener el modelo","Evitar la recolección de datos porque el simulador ya los contiene","Practicar situaciones peligrosas sin poner en riesgo personas ni equipos","Obtener resultados exactos que no requieren validación con el avión real"],2,"Permite ensayar emergencias sin riesgo real."],
+["O","Un técnico sale de O = (0, 0). Sus clientes están en A = (1, 0), B = (4, 0) y C = (1; 2,5). Con el voraz del vecino más cercano, ¿qué ruta sigue?","",["O → B → A → C → O","O → A → B → C → O","O → A → C → B → O","O → C → A → B → O"],2,"Desde O el más cercano es A (1). Desde A: C está a 2,5 y B a 3 → C. Queda B y se vuelve a O."],
+["S","Cuando los resultados de la simulación no coinciden con el sistema real y se ajustan los parámetros del modelo computacional, se está realizando la:","",["abstracción","verificación","documentación","calibración"],3,"Ajustar parámetros para que el modelo reproduzca la realidad es calibrar."],
+["G","El grafo del dodecaedro tiene 20 vértices, todos de grado 3, y admite un ciclo que visita cada vértice una sola vez. ¿Cómo se clasifica?","",["Euleriano y hamiltoniano","Euleriano, pero no hamiltoniano","Ni euleriano ni hamiltoniano","Hamiltoniano, pero no euleriano"],3,"Tiene ciclo hamiltoniano, pero sus grados son impares, así que no es euleriano."],
+["O","Un backlog tiene 12 historias y cada una puede entrar o no al sprint. ¿Cuántas soluciones tiene el espacio de búsqueda, sin revisar la capacidad?","",["479 001 600","4096","144","24"],1,"Dos opciones por historia: 2¹² = 4096."],
+["E","En el modelo presa-depredador x' = 1.2x − 0.6xy, y' = −0.8y + 0.3xy, ¿cuál es el equilibrio con ambas poblaciones positivas?","",["x = 2, y ≈ 2.67","x ≈ 2.67, y = 2","x = 4, y = 0.5","x = 0.5, y = 1.5"],1,"x' = 0 → y = 1.2/0.6 = 2; y' = 0 → x = 0.8/0.3 ≈ 2.67."],
+["S","Un taller recibe piezas de tres tamaños que esperan en un almacén hasta que un operario las lleva a un torno. El tamaño de cada pieza es:","",["un recurso del sistema","una actividad del operario","un evento del proceso","un atributo de la entidad"],3,"La pieza es la entidad y su tamaño es una característica suya: un atributo."],
+["Y","Se define f(x) = eˣ + x + sin(x) y se evalúa en a[0], donde a = np.arange(3, 12, 0.1). ¿Qué valor se obtiene?","",["23.23","23.09","26.09","20.09"],0,"a[0] = 3: e³ + 3 + sin 3 = 20.086 + 3 + 0.141 = 23.23."],
+["O","Un sprint tiene capacidad de 20 puntos. Historias (puntos, valor): A (4, 15), C (10, 20), H (16, 22), I (5, 12) y K (4, 10). ¿Cuál selección es factible y tiene el mayor valor?","",["{A, H}, con 37","{C, I, K}, con 42","{A, C, I}, con 47","{C, H}, con 42"],2,"{A, C, I} usa 19 puntos y vale 47. {C, H} usa 26 puntos: no es factible."],
+["Y","Se grafica Z = X·e^(−X² − Y²). ¿Qué valor toma Z en el punto (1, 0)?","x = np.arange(-2, 2, 0.1)\ny = np.arange(-2, 2, 0.1)\nX, Y = np.meshgrid(x, y)\nZ = X * np.exp(-X**2 - Y**2)",["e¹ ≈ 2.718","e⁻¹ ≈ 0.368","0","e⁻² ≈ 0.135"],1,"Z(1, 0) = 1·e^(−1) ≈ 0.368."],
+["N","Un generador multiplicativo usa m = 2^g, a = 5 + 8k y semilla impar; su periodo máximo es m/4. ¿Cuál es ese periodo con g = 5?","",["8","16","31","32"],0,"m = 32 → 32/4 = 8."],
+["N","Una triangular con a = 5, moda c = 10 y b = 20 se genera así: si rⱼ ≤ (c − a)/(b − a), entonces x = a + (c − a)√rᵢ. Con rⱼ = 0.2 y rᵢ = 0.64, ¿qué valor se obtiene?","",["11.4","13.0","8.2","9.0"],3,"0.2 ≤ 5/15 = 0.333 → x = 5 + 5·√0.64 = 5 + 4 = 9.0."],
+["P","Una red con lugares Cola y Espacios y transiciones Producir y Consumir tiene C = [[1, −1], [−1, 1]] (filas: Cola, Espacios). ¿Qué da yᵀC con y = (1, 1) y qué significa?","",["(2, 0): solo Producir modifica la suma de ambos lugares de la red","(1, 1): cada disparo agrega una marca a la suma de ambos lugares","(0, 0): ninguna de las dos transiciones puede llegar a dispararse","(0, 0): la suma Cola + Espacios no cambia con ningún disparo"],3,"(1 − 1, −1 + 1) = (0, 0): y es un P-invariante, así que Cola + Espacios es constante."],
+["R","La vida útil de un SSD es exponencial con media 5 años. Si ya funcionó 3 años, ¿probabilidad de que dure más de 5 años en total?","",["0.3679","0.4493","0.6703","0.5488"],2,"Por falta de memoria: P(X > 2) = e^(−2/5) = 0.6703."],
+["Y","Se necesita elegir 2 clientes distintos de clientes = ['C1', 'C2', 'C3', 'C4', 'C5'] para una encuesta. ¿Qué función es la adecuada?","",["random.shuffle(clientes, 2)","random.choice(clientes, 2)","random.sample(clientes, 2)","random.randint(clientes, 2)"],2,"sample elige k elementos distintos sin reemplazo."],
+["O","¿En cuál de estas situaciones conviene usar búsqueda exhaustiva?","",["Para ordenar 60 visitas diarias en pocos segundos","Cuando el espacio crece de forma factorial con n","Cuando una solución muy buena es suficiente","Para validar una heurística en un caso pequeño"],3,"En un caso pequeño se puede obtener el óptimo exacto y comparar con la heurística."],
+["P","En la misma red (t consume 2 marcas de P1 y 1 de P3, y produce 1 en P2), ¿está habilitada t con M = (P1, P2, P3) = (1, 0, 1)?","",["Sí, porque el marcado total de la red es mayor que 2","No, porque P2 tiene 0 marcas y debe tener una","Sí, porque P1 y P3 tienen al menos una marca","No, porque P1 tiene 1 marca y el arco exige 2"],3,"Cada lugar de entrada debe cubrir el peso de su arco: P1 tiene 1 < 2."],
+["A","Un modelo de regresión múltiple con k = 2 variables y n = 13 datos tiene R² = 0.9787. Con R²aj = 1 − (1 − R²)(n − 1)/(n − k − 1), ¿cuánto vale R²aj?","",["0.9787","0.9830","0.9744","0.9766"],2,"1 − 0.0213·12/10 = 1 − 0.02556 = 0.9744."],
+["Y","Se define numero_complejo = 3 + 4j. ¿Qué devuelve type(numero_complejo) y qué vale numero_complejo.imag?","",["int y 4","complex y 4.0","float y 4.0","complex y 3.0"],1,"Es de tipo complex y sus partes se guardan como float: imag = 4.0."],
+["O","En una búsqueda tabú de maximización, la mejor solución encontrada vale 52. Un movimiento tabú produce una solución de valor 54. ¿Qué indica el criterio de aspiración?","",["Se permite el movimiento porque supera a la mejor solución","Se rechaza porque los movimientos tabú nunca se permiten","Se permite solo si su tenencia ya llegó a cero en esta iteración","Se rechaza y se vacía la lista tabú para continuar"],0,"La aspiración levanta la prohibición si el movimiento mejora la mejor solución conocida."],
+["P","Una planta recibe 5 lotes. Cada lote pasa por pretratamiento (1 h, sin límite), reactor (6 h, máximo 2 lotes a la vez) y sedimentación (2 h). Todo arranca en la hora 0. ¿A qué hora termina el último lote?","",["A la hora 21","A la hora 45","A la hora 9","A la hora 15"],0,"Reactor: lotes 1–2 de 1 a 7, lotes 3–4 de 7 a 13, lote 5 de 13 a 19. Sedimentación del lote 5: 19 a 21."],
+["G","¿Qué imprime el siguiente código?","import networkx as nx\nG = nx.Graph()\nG.add_edges_from([('a', 'b'), ('a', 'c'), ('b', 'c'), ('b', 'd'),\n                  ('c', 'e'), ('d', 'e'), ('e', 'f')])\nprint(sorted(G.neighbors('e')))",["3","['a', 'b', 'c', 'd', 'f']","['c', 'd']","['c', 'd', 'f']"],3,"Las aristas con e son c–e, d–e y e–f."],
+["G","El grafo de Petersen tiene 10 vértices y es 3-regular. Con m = nk/2, ¿cuántas aristas tiene?","",["13","15","10","30"],1,"10·3/2 = 15."],
+["A","Ajuste y = a₀ + a₁x + a₂x² a x: 0, 1, 2, 3, 4, 5 y y: 2.1, 7.7, 13.6, 27.2, 40.9, 61.1. ¿Qué modelo se obtiene?","",["y = 2.479 − 2.359x + 1.861x²","y = −3.724 + 11.663x","y = 2.479 + 2.359x + 1.861x²","y = 1.861 + 2.359x + 2.479x²"],2,"np.polyfit da [1.861, 2.359, 2.479] (de mayor a menor grado)."],
+["R","¿Cuál de estas variables aleatorias es continua?","",["El tiempo de respuesta de una API, en ms","El número de builds fallidos en un día","Los tickets que llegan en una hora","Los defectos en un módulo de 2000 líneas"],0,"Un tiempo puede tomar cualquier valor real; las demás son conteos."],
+["N","Un generador aditivo usa Xₙ = (Xₙ₋₁ + Xₙ₋₅) mod 100 con semillas 65, 89, 98, 03 y 69 (X₁ a X₅). Si X₆ = 34, ¿cuánto vale X₇?","",["03","21","55","23"],3,"X₇ = (X₆ + X₂) mod 100 = (34 + 89) mod 100 = 23."],
+["Y","Con las matrices de abajo, ¿qué valor tiene el elemento [1, 2] de C * D?","C = np.array([[3, 2, 4], [1, 2, 7], [9, 7, 6]])\nD = np.array([[3, 4, 2], [1, 3, 7], [9, 3, 2]])",["14","7","30","49"],3,"* es producto elemento a elemento: C[1,2]·D[1,2] = 7·7 = 49."],
+["Y","Balance de masa: 3x + 2y + z = 39, 2x + 3y + z = 34, x + y + 4z = 26. Con np.linalg.solve, ¿cuál es la solución aproximada?","",["x ≈ 9.167, y ≈ 3.167, z ≈ 4.167","x ≈ 9.167, y ≈ 4.167, z ≈ 3.167","x ≈ 4.167, y ≈ 9.167, z ≈ 3.167","x ≈ 8.500, y ≈ 4.500, z ≈ 3.250"],1,"La solución es (9.167, 4.167, 3.167); se comprueba sustituyendo en las ecuaciones."],
+["Y","¿Qué imprime este código?","pais = 'Ecuador'\nprint(len(pais))",["8","7","1","6"],1,"'Ecuador' tiene 7 caracteres."],
+["N","¿Qué imprime el código del método de producto medio?","def centrales(numero, d):\n    s = str(numero).zfill(d)\n    inicio = (len(s) - d) // 2\n    return int(s[inicio:inicio + d])\n\nsec = [21, 37]\nnums = []\nfor _ in range(2):\n    v = centrales(sec[-2] * sec[-1], 2)\n    sec.append(v)\n    nums.append(v / 100)\nprint(nums)",["[0.77, 0.28]","[0.77, 0.49]","[0.77, 0.84]","[0.07, 0.84]"],2,"21·37 = 777 → '77'; 37·77 = 2849 → '84'."],
+["Y","Se convierte un tiempo de 12.5 horas a entero con int(12.5). ¿Cuál es el resultado y por qué?","",["Un error, porque 12.5 no es un número entero","12, porque int() trunca la parte decimal","12.0, porque int() conserva el tipo float","13, porque int() redondea hacia arriba"],1,"int() trunca hacia cero."],
+["E","Un controlador de autoescalado se modela con x'' + cx' + 4x = 0, con amortiguamiento crítico en c = 4. ¿Cómo responde con c = 1?","",["Sub-amortiguado: oscila antes de estabilizarse","Sobre-amortiguado: vuelve lento y sin oscilar","Inestable: la desviación crece sin límite","Amortiguamiento crítico: vuelve sin oscilar"],0,"0 < c < c_crítico → sub-amortiguado (oscila y se estabiliza)."],
+["P","Dos procesos A y B comparten un mutex. La red cumple M(A_crítica) + M(Mutex) + M(B_crítica) = 1 en todo marcado alcanzable. ¿Qué garantiza este invariante?","",["Que el mutex siempre está libre al terminar cada paso","Que A y B nunca están a la vez en la sección crítica","Que A entra a la sección crítica siempre antes que B","Que A y B nunca quedan bloqueados esperando el mutex"],1,"Como la suma es 1, solo uno de los tres lugares puede tener la marca: exclusión mutua."],
+["O","Un equipo decide qué historias entran a un sprint para entregar el mayor valor sin superar 20 puntos. ¿Qué son las variables de decisión?","",["El conjunto de todos los sprints posibles","Si cada historia entra o no al sprint","El límite de 20 puntos de esfuerzo","El valor total que se entrega al cliente"],1,"Las decisiones son xᵢ ∈ {0, 1}; el límite es la restricción y el valor es la función objetivo."],
+["E","Un SIR discreto usa ΔI = βSₜIₜ/N, ΔR = γIₜ e Iₜ₊₁ = Iₜ + ΔI − ΔR. Con N = 1000, S₀ = 995, I₀ = 5, β = 0.3 y γ = 0.1, ¿cuánto vale I₁?","",["5.5000","4.5075","6.4925","5.9925"],3,"ΔI = 0.3·995·5/1000 = 1.4925; ΔR = 0.5; I₁ = 5 + 1.4925 − 0.5 = 5.9925."],
+["A","Para la función logística f(x) = L / (1 + e^(−k(x − x₀))), ¿cuánto vale f(x₀) para cualquier k?","",["L/e","0","L","L/2"],3,"En x₀ el exponente es 0: L/(1 + 1) = L/2."],
+["P","¿Por qué se dice que una red de Petri es un grafo dirigido bipartito?","",["Porque los lugares se pueden pintar con dos colores sin arcos entre ellos","Porque cada transición tiene exactamente dos lugares de entrada y salida","Porque los arcos van de ida y vuelta entre cada par de lugares de la red","Porque cada arco une un lugar con una transición, nunca dos iguales"],3,"Hay dos tipos de nodos (lugares y transiciones) y los arcos solo cruzan entre tipos."],
+["O","Tareas (duración; predecesoras): A 2; B 3 (A); C 2 (A); D 5 (B); E 4 (C); F 2 (D, E); G 3 (F); H 2 (D); I 1 (G, H). ¿Duración mínima según la ruta crítica?","",["18 días","24 días","16 días","14 días"],2,"Ruta crítica A–B–D–F–G–I: 2 + 3 + 5 + 2 + 3 + 1 = 16."],
+["O","En el enfriamiento simulado un vecino empeora en Δ = 1 con T = 2. ¿Probabilidad de aceptarlo, p = e^(−Δ/T)?","",["0,61","0,37","0,50","0,14"],0,"e^(−0.5) = 0.61."],
+["Y","Se usa plt.contourf(x, y, h, cmap='jet'). ¿Qué representa esta gráfica?","",["Un mapa de contorno relleno de h(x,y)","Una nube de puntos 3D con coordenadas (x,y,h)","Una superficie 3D de h(x,y) con perspectiva","Un histograma de los valores de h(x,y)"],0,"contourf = contornos rellenos (filled), en 2D."],
+["P","Un productor publica mensajes en una cola de capacidad 3. Lugares: Cola (inicio 0) y Espacios (inicio 3); Producir consume un espacio y Consumir lo devuelve. ¿Qué invariante impide que la cola se desborde?","",["M(Cola) + M(Espacios) = 0","M(Cola) · M(Espacios) = 3","M(Cola) + M(Espacios) = 3","M(Cola) − M(Espacios) = 3"],2,"La suma se conserva en 0 + 3 = 3, así que la Cola nunca supera 3."],
+["A","Se miden x: 2, 4, 6, 8, 10 y y: 2.8, 8.1, 14.6, 22.9, 31.7. Ajuste y = b·xᵐ mediante ln y = ln b + m ln x. ¿Qué modelo se obtiene?","",["y = 1.508·x^0.990","y = 0.990·x^1.508","y = −0.010·x^1.508","y = 0.990·x^1.200"],1,"Pendiente m = 1.508; intercepto −0.010 → b = e^(−0.010) = 0.990."],
+["O","¿Qué diferencia a un óptimo local de un óptimo global?","",["El local se obtiene con búsqueda exhaustiva y el global no","El global es el mejor de su vecindario y el local de todo S","El local cumple las restricciones del problema y el global no siempre","El local es el mejor de su vecindario, no de todo el espacio"],3,"El global es el mejor de todo el espacio S."],
+["Y","¿Cuál es el valor aproximado de crecimiento_exponencial(10, A=2.0, k=0.3)?","def crecimiento_exponencial(x, A=1.0, k=0.5):\n    return A * np.exp(k * x)",["20.09","8.00","40.17","6.00"],2,"2·e³ = 2·20.086 = 40.17."]
+];
+
+const L="abcd";
+let sel=new Set(Object.keys(T)), run=[], i=0, ok=0, answered=false, wrong=[];
+const $=id=>document.getElementById(id);
+const shuffle=a=>{for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a};
+
+function chips(){
+  const c=$("chips");c.innerHTML="";
+  const all=document.createElement("button");all.className="chip"+(sel.size===Object.keys(T).length?" on":"");all.textContent="Todos";
+  all.onclick=()=>{sel=sel.size===Object.keys(T).length?new Set():new Set(Object.keys(T));chips()};c.appendChild(all);
+  for(const k in T){const n=Q.filter(q=>q[0]===k).length;const b=document.createElement("button");b.className="chip"+(sel.has(k)?" on":"");b.textContent=`${T[k]} (${n})`;
+    b.onclick=()=>{sel.has(k)?sel.delete(k):sel.add(k);chips()};c.appendChild(b)}
+  const n=Q.filter(q=>sel.has(q[0])).length;$("avail").textContent=`${n} preguntas disponibles con estos temas.`;$("start").disabled=!n;
+}
+function view(v){for(const s of["setup","quiz","result","study"])$(s).classList.toggle("hidden",s!==v);
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on",(v==="study")===(t.dataset.v==="study")))}
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{if(t.dataset.v==="study"){study();view("study")}else view(run.length&&i<run.length?"quiz":"setup")});
+
+$("start").onclick=()=>{
+  let pool=Q.map((q,n)=>n).filter(n=>sel.has(Q[n][0]));
+  if($("shuffleQ").checked)shuffle(pool);
+  const c=$("count").value;if(c!=="all")pool=pool.slice(0,+c);
+  run=pool.map(n=>{const ord=[0,1,2,3];if($("shuffleO").checked)shuffle(ord);return{n,ord}});
+  i=0;ok=0;wrong=[];view("quiz");show();
+};
+function show(){
+  const {n,ord}=run[i],q=Q[n];answered=false;
+  $("pos").textContent=`Pregunta ${i+1} de ${run.length}`;$("score").textContent=`Aciertos: ${ok}`;
+  $("prog").style.width=(i/run.length*100)+"%";
+  $("qtopic").textContent=T[q[0]];$("qtext").textContent=q[1];
+  $("qcode").classList.toggle("hidden",!q[2]);$("qcode").textContent=q[2];
+  const o=$("opts");o.innerHTML="";
+  ord.forEach((oi,pos)=>{const b=document.createElement("button");b.className="opt";
+    b.innerHTML=`<span class="k">${L[pos]}</span><span></span>`;b.lastChild.textContent=q[3][oi];
+    b.onclick=()=>pick(pos);o.appendChild(b)});
+  $("expl").className="expl hidden";$("next").disabled=true;
+  $("next").textContent=i===run.length-1?"Ver resultado":"Siguiente";
+}
+function pick(pos){
+  if(answered)return;answered=true;
+  const {n,ord}=run[i],q=Q[n],good=ord.indexOf(q[4]);
+  const bs=[...$("opts").children];bs.forEach(b=>b.disabled=true);
+  bs[good].classList.add("ok");
+  const hit=pos===good;if(hit)ok++;else{bs[pos].classList.add("bad");wrong.push(n)}
+  const e=$("expl");e.className="expl "+(hit?"ok":"bad");
+  e.innerHTML=`<b>${hit?"Correcto.":"Incorrecto. La respuesta es la "+L[good]+")."}</b> `;e.appendChild(document.createTextNode(q[5]));
+  $("score").textContent=`Aciertos: ${ok}`;$("next").disabled=false;$("next").focus();
+}
+$("next").onclick=()=>{i++;i<run.length?show():result()};
+$("quit").onclick=()=>{run=run.slice(0,i+(answered?1:0));result()};
+document.addEventListener("keydown",e=>{
+  if($("quiz").classList.contains("hidden"))return;
+  const k="1234abcd".indexOf(e.key.toLowerCase());
+  if(k>=0&&!answered)pick(k%4);else if(e.key==="Enter"&&answered)$("next").click();
+});
+function result(){
+  const total=run.length,pct=total?Math.round(ok/total*100):0;
+  const per={};run.slice(0,total).forEach(r=>{const t=Q[r.n][0];per[t]=per[t]||[0,0];per[t][1]++;if(!wrong.includes(r.n))per[t][0]++});
+  const r=$("result");
+  r.innerHTML=`<p class="label">Resultado</p><p class="big">${ok} / ${total}</p><p class="muted">${pct} % de aciertos · nota sobre 16: ${(total?ok/total*16:0).toFixed(1)}</p>
+  <div class="stats">${Object.entries(per).map(([t,[a,b]])=>`<div class="stat">${T[t]}<b>${a} / ${b}</b></div>`).join("")}</div>
+  <div class="nav" style="justify-content:flex-start">
+  <button class="btn" id="again">Nuevo quiz</button>${wrong.length?'<button class="btn ghost" id="retry">Repetir solo las falladas</button>':""}</div>
+  ${wrong.length?'<p class="label" style="margin-top:22px">Para repasar</p><div id="wl"></div>':""}`;
+  view("result");$("prog").style.width="100%";
+  $("again").onclick=()=>{run=[];view("setup")};
+  if(wrong.length){
+    $("retry").onclick=()=>{run=shuffle(wrong.slice()).map(n=>({n,ord:[0,1,2,3]}));i=0;ok=0;wrong=[];view("quiz");show()};
+    const wl=$("wl");wrong.forEach(n=>wl.appendChild(item(n)));
+  }
+}
+function item(n){
+  const q=Q[n],d=document.createElement("div");d.className="review-item";
+  d.innerHTML=`<span class="topic"></span><p class="q" style="margin-bottom:8px"></p>${q[2]?"<pre></pre>":""}<div class="ans">Respuesta: <b></b></div><div class="muted" style="margin-top:4px"></div>`;
+  d.querySelector(".topic").textContent=T[q[0]];d.querySelector(".q").textContent=q[1];
+  if(q[2])d.querySelector("pre").textContent=q[2];
+  d.querySelector("b").textContent=q[3][q[4]];d.querySelector(".muted").textContent=q[5];return d;
+}
+function study(){
+  const f=$("find").value.toLowerCase(),l=$("list");l.innerHTML="";
+  Q.forEach((q,n)=>{if(!f||(q[1]+q[2]+q[3].join(" ")).toLowerCase().includes(f))l.appendChild(item(n))});
+  if(!l.children.length)l.innerHTML='<p class="muted">Sin resultados.</p>';
+}
+$("find").oninput=study;
+chips();
+</script>
+</body>
+</html>
