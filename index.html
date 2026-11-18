@@ -68,7 +68,7 @@ input[type=search]{width:100%;font:inherit;padding:9px 12px;border-radius:10px;b
 <div class="wrap">
 <header>
   <h1>Modelos Matemáticos y Simulación</h1>
-  <p>Banco de 214 preguntas únicas con respuesta correcta y explicación.</p>
+  <p>Banco de 215 preguntas únicas con respuesta correcta y explicación.</p>
 </header>
 
 <div class="tabs">
@@ -254,7 +254,7 @@ const Q=[
 ["S","En el proceso de modelado y simulación, ¿qué etapa sigue inmediatamente a la implementación del modelo?","",["Experimentación","Validación","Diseño de experimentos","Verificación"],3,"Tras programar se verifica que el código hace lo que el modelo dice."],
 ["E","El error global de RK4 es O(h⁴). Si el paso se reduce de h a h/2, ¿por cuánto se divide el error?","",["Por 2","Por 8","Por 16","Por 4"],2,"(1/2)⁴ = 1/16."],
 ["Y","Para A = [[2, 1], [1, 3]] y B = [[4, 2], [0, 5]], ¿qué devuelve A @ B?","",["[[8, 9], [4, 17]]","[[10, 10], [5, 15]]","[[6, 3], [1, 8]]","[[8, 2], [0, 15]]"],0,"Fila 1: [2·4 + 1·0, 2·2 + 1·5] = [8, 9]; fila 2: [4, 2 + 15] = [4, 17]."],
-["S","«Las cosas se deben hacer tan simples como sea posible, pero no demasiado simples». Aplicado al modelado, el modelo debe:","",["conservar solo lo necesario sin dejar de representar el sistema","evitar las suposiciones de linealidad porque siempre producen errores grandes","incluir todas las variables del sistema para que los resultados sean exactos","reducirse al mínimo de ecuaciones aunque deje de representar el sistema real"],0,"Simplicidad sin perder representatividad."],
+["S","Frase atribuida a Einstein: «Las cosas se deben hacer tan simples como sea posible, pero no demasiado simples». Aplicado al modelado, el modelo debe:","",["conservar solo lo necesario sin dejar de representar el sistema","evitar las suposiciones de linealidad porque siempre producen errores grandes","incluir todas las variables del sistema para que los resultados sean exactos","reducirse al mínimo de ecuaciones aunque deje de representar el sistema real"],0,"Simplicidad sin perder representatividad."],
 ["P","En la misma red (T1 necesita una marca en P1 y otra en P6; ninguna transición deposita marcas en P1), tras disparar T1…T5 la marca vuelve a P6. ¿Qué ocurre después?","",["Se bloquea: T1 también necesita una marca en P1","La red sigue funcionando porque P7 repone la marca de P1","La red se desborda porque P6 acumula marcas sin límite","T1 se dispara otra vez porque P6 tiene de nuevo su marca"],0,"P1 quedó vacío y nadie lo repone: T1 no puede volver a dispararse."],
 ["N","¿Por qué para variables discretas se usa el método tabular en lugar de despejar x = F⁻¹(r)?","",["Porque F(x) de una discreta es siempre lineal","Porque p(x) puede ser mayor que 1","Porque los r discretos no son uniformes","Porque F(x) es escalonada y no se puede invertir"],3,"F escalonada no es biyectiva: se busca el intervalo donde cae r."],
 ["O","Una búsqueda local de ascenso de colinas con mejor mejora evalúa todos los vecinos. ¿Cuándo se detiene?","",["Cuando revisa todas las soluciones del espacio","Cuando el mejor vecino empeora en más del 10 %","Cuando ningún vecino mejora a la solución actual","Cuando la lista de movimientos prohibidos se llena"],2,"Se detiene en un óptimo local."],
@@ -329,7 +329,8 @@ const Q=[
 ["P","Un productor publica mensajes en una cola de capacidad 3. Lugares: Cola (inicio 0) y Espacios (inicio 3); Producir consume un espacio y Consumir lo devuelve. ¿Qué invariante impide que la cola se desborde?","",["M(Cola) + M(Espacios) = 0","M(Cola) · M(Espacios) = 3","M(Cola) + M(Espacios) = 3","M(Cola) − M(Espacios) = 3"],2,"La suma se conserva en 0 + 3 = 3, así que la Cola nunca supera 3."],
 ["A","Se miden x: 2, 4, 6, 8, 10 y y: 2.8, 8.1, 14.6, 22.9, 31.7. Ajuste y = b·xᵐ mediante ln y = ln b + m ln x. ¿Qué modelo se obtiene?","",["y = 1.508·x^0.990","y = 0.990·x^1.508","y = −0.010·x^1.508","y = 0.990·x^1.200"],1,"Pendiente m = 1.508; intercepto −0.010 → b = e^(−0.010) = 0.990."],
 ["O","¿Qué diferencia a un óptimo local de un óptimo global?","",["El local se obtiene con búsqueda exhaustiva y el global no","El global es el mejor de su vecindario y el local de todo S","El local cumple las restricciones del problema y el global no siempre","El local es el mejor de su vecindario, no de todo el espacio"],3,"El global es el mejor de todo el espacio S."],
-["Y","¿Cuál es el valor aproximado de crecimiento_exponencial(10, A=2.0, k=0.3)?","def crecimiento_exponencial(x, A=1.0, k=0.5):\n    return A * np.exp(k * x)",["20.09","8.00","40.17","6.00"],2,"2·e³ = 2·20.086 = 40.17."]
+["Y","¿Cuál es el valor aproximado de crecimiento_exponencial(10, A=2.0, k=0.3)?","def crecimiento_exponencial(x, A=1.0, k=0.5):\n    return A * np.exp(k * x)",["20.09","8.00","40.17","6.00"],2,"2·e³ = 2·20.086 = 40.17."],
+["R","El tiempo de respuesta de una API es normal con media 250 ms y desviación 40 ms, y z₀.₉₅ = 1.645. ¿Qué tiempo cumple el 95 % de las peticiones (percentil 95)?","",["328.4 ms","184.2 ms","315.8 ms","291.1 ms"],2,"x = μ + z·σ = 250 + 1.645·40 = 315.8 ms."]
 ];
 
 const L="abcd";
@@ -409,9 +410,10 @@ function item(n){
   if(q[2])d.querySelector("pre").textContent=q[2];
   d.querySelector("b").textContent=q[3][q[4]];d.querySelector(".muted").textContent=q[5];return d;
 }
+const norm=s=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[\s`'"«»]/g,"").replace(/[₀₁₂₃₄₅₆₇₈₉]/g,c=>"₀₁₂₃₄₅₆₇₈₉".indexOf(c)).replace(/ᵢ/g,"i").replace(/ⱼ/g,"j").replace(/ₙ/g,"n").replace(/ₖ/g,"k").replace(/₊/g,"+").replace(/₋/g,"-");
 function study(){
-  const f=$("find").value.toLowerCase(),l=$("list");l.innerHTML="";
-  Q.forEach((q,n)=>{if(!f||(q[1]+q[2]+q[3].join(" ")).toLowerCase().includes(f))l.appendChild(item(n))});
+  const f=norm($("find").value),l=$("list");l.innerHTML="";
+  Q.forEach((q,n)=>{if(!f||norm(q[1]+q[2]+q[3].join(" ")).includes(f))l.appendChild(item(n))});
   if(!l.children.length)l.innerHTML='<p class="muted">Sin resultados.</p>';
 }
 $("find").oninput=study;
